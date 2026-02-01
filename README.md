@@ -1,0 +1,1 @@
+Modified version of [Screen Grabber 4.2.0](https://github.com/SymbianSource/oss.FCL.sf.tools.rndtools/tree/master/screengrabber)

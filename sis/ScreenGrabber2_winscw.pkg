@@ -1,0 +1,44 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:
+;
+
+; Language - standard language definitions
+&EN
+
+; Standard SIS file header
+#{"ScreenGrabber2"},(0xdbee45c2),4,3,0,TYPE=SA
+
+;Supports Series 60 v 3.0
+[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+
+;Supports S60 5th Edition
+[0x1028315F], 0, 0, 0, {"Series60ProductID"}
+
+;Supports Symbian^3
+[0x20022E6D], 0, 0, 0, {"Series60ProductID"}
+
+
+; Non-localised vendor name
+:"Nokia Corporation, JigokuMaster"
+
+; Localised vendor names
+%{"Nokia Corporation, JigokuMaster"}
+
+; normal stuff:
+"$(EPOCROOT)epoc32\release\winscw\udeb\ScreenGrabber2.exe"-"!:\sys\bin\ScreenGrabber2.exe"
+"$(EPOCROOT)epoc32\data\z\resource\apps\ScreenGrabber2_aif.mif"-"!:\Resource\Apps\ScreenGrabber2_aif.mif"
+"$(EPOCROOT)epoc32\data\z\resource\apps\ScreenGrabber2.rsc"-"!:\Resource\Apps\ScreenGrabber2.rsc"
+"$(EPOCROOT)epoc32\data\z\private\10003a3f\apps\ScreenGrabber2_reg.rsc"-"!:\private\10003a3f\import\apps\ScreenGrabber2_reg.rsc"
+"..\group\backup_registration.xml"-"!:\private\dbee45c2\backup_registration.xml"
