@@ -48,6 +48,9 @@ END
 
 //APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE	 /epoc32/include
+SYSTEMINCLUDE	 /epoc32/include/libc
+SYSTEMINCLUDE	 ../inc/internal
+
 USERINCLUDE       ../inc
 SOURCEPATH        ../src
 
@@ -61,6 +64,7 @@ SOURCE            SGSettingListView.cpp
 SOURCE            SGSettingListContainer.cpp
 SOURCE            SGModel.cpp
 SOURCE            SGGifAnimator.cpp
+SOURCE            SGNewFormats.cpp
 
 LIBRARY           euser.lib
 LIBRARY           apparc.lib
@@ -83,8 +87,11 @@ LIBRARY           mediaclientaudio.lib
 LIBRARY           estor.lib
 LIBRARY           gdi.lib
 LIBRARY           eikctl.lib
+LIBRARY           eikdlg.lib
 LIBRARY           eikcdlg.lib
+LIBRARY           egul.lib aknicon.lib
 LIBRARY           hal.lib
+LIBRARY           estlib.lib
 
 // Multidrive support
 //#if(!defined __SERIES60_30__ && !defined __SERIES60_31__)

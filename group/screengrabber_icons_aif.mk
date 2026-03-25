@@ -23,6 +23,7 @@ endif
 TARGETDIR=$(ZDIR)\resource\apps
 ICONTARGETFILENAME=$(TARGETDIR)\ScreenGrabber2_aif.mif
 
+ICONSOURCEFILENAME=..\icons\ScreenGrabber.svg
 
 do_nothing :
 	@rem do_nothing
@@ -43,9 +44,9 @@ CLEANLIB : do_nothing
 
 RESOURCE : $(ICONTARGETFILENAME)
 
-$(ICONTARGETFILENAME) : ..\icons\qgn_menu_screengrabber.svg
+$(ICONTARGETFILENAME) : $(ICONSOURCEFILENAME)
 	mifconv $(ICONTARGETFILENAME) \
-		/c8,8 ..\icons\qgn_menu_screengrabber.svg
+		/c8,8 $(ICONSOURCEFILENAME)
 
 FREEZE : do_nothing
 

@@ -1,0 +1,156 @@
+/*
+============================================================================
+ Name		: ScreenGrabber2_01.rls
+
+ Author	  : JigokuMaster
+ Copyright   : Your copyright notice
+ Description : This is a localisation file for Squirrel
+				A .rls file is the one and only place where the logical
+				strings to be localised are defined. 
+============================================================================
+*/
+
+CHARACTER_SET UTF8
+
+//  LOCALISATION STRINGS
+
+// Caption string for app.
+rls_string qtn_caption_string "SG2"
+
+
+// strings for menu commands 
+rls_string STRING_r_sg_command1 "Send to background"
+
+rls_string STRING_r_sg_command2 "Screen resolution"
+
+rls_string STRING_r_sg_command3 "Settings"
+
+rls_string STRING_r_sg_command4 "About"
+
+rls_string STRING_r_sg_command5 "Exit"
+// used in settings menu
+rls_string STRING_r_sg_command6 "Change"
+
+
+// strings for settings cba
+
+rls_string STRING_r_sg_cba1 "Options"
+rls_string STRING_r_sg_cba2 "Back"
+
+// strings for settings
+
+rls_string qtn_settings_caption_string "Settings"
+
+rls_string STRING_r_sg_item1 "Capture mode"
+
+rls_string STRING_r_sg_item2 "Screen device"
+
+rls_string STRING_r_sg_item3  "Capture hotkey"
+
+rls_string STRING_r_sg_item4  "Image format"
+
+rls_string STRING_r_sg_item5  "File name"
+
+rls_string STRING_r_sg_item6  "Start/stop hotkey"
+
+rls_string STRING_r_sg_item7  "Delay (ms)"
+
+rls_string STRING_r_sg_item8  "Video format"
+
+rls_string STRING_r_sg_item9  "Save path"
+
+// strings for settings sub items (Capture mode)
+
+rls_string STRING_r_sg_arr1_item1  "Single capture"
+
+rls_string STRING_r_sg_arr1_item2  "Sequantial capture"
+
+rls_string STRING_r_sg_arr1_item3  "Video capture"
+
+
+// strings for settings sub items (Screen device)
+
+rls_string STRING_r_sg_arr2_item1   "Primary screen"
+
+rls_string STRING_r_sg_arr2_item2  "Secondary screen"
+
+
+// strings for settings sub items (Hotkeys)
+
+rls_string STRING_r_sg_arr3_item1   "Send key"
+
+rls_string STRING_r_sg_arr3_item2  "SHIFT+*"
+
+rls_string STRING_r_sg_arr3_item3  "HASH+*"
+
+rls_string STRING_r_sg_arr3_item4 "SHIFT+Menu"
+
+rls_string STRING_r_sg_arr3_item5 "Power key"
+
+rls_string STRING_r_sg_arr3_item6 "Side key"
+
+rls_string STRING_r_sg_arr3_item7 "Camera key #1"
+
+rls_string STRING_r_sg_arr3_item8 "Camera key #2"
+
+rls_string STRING_r_sg_arr3_item9 "POC"
+
+rls_string STRING_r_sg_arr3_item10 "Custom"
+
+// strings for settings sub items (Image format)
+
+rls_string STRING_r_sg_arr4_item1   "PNG"
+
+rls_string STRING_r_sg_arr4_item2   "JPEG high qual."
+
+rls_string STRING_r_sg_arr4_item3   "JPEG low qual."
+
+rls_string STRING_r_sg_arr4_item4   "BMP"
+
+rls_string STRING_r_sg_arr4_item5   "GIF"
+
+rls_string STRING_r_sg_arr4_item6   "HQ GIF"
+
+rls_string STRING_r_sg_arr4_item7   "MBM"
+
+// strings for settings sub items (Video format)
+
+rls_string STRING_r_sg_arr5_item1   "Animated GIF"
+
+rls_string STRING_r_sg_arr5_item2   "HQ Animated GIF"
+
+// strings for dialog (Custom key)
+
+rls_string STRING_r_dlg1_label  "Press some key:" 
+
+// strings for dialog (About)
+
+rls_string STRING_r_dlg2_label  "About Scr.Grabber"
+
+// strings for (Save Path Selection Dialog)
+
+rls_string STRING_r_dlg3_label  "Select path:"
+
+// strings for (Save Progress Dialog)
+
+rls_string STRING_r_dlg4_prompt "Saving"
+
+// strings for (Exit Query)
+
+rls_string STRING_r_dlg5_prompt "Stop taking screen shots and exit?"
+
+
+// string for (Save Confirmation Query)
+
+rls_string STRING_r_dlg6_prompt1 "Screen shot saved to Media Gallery"
+
+rls_string STRING_r_dlg6_prompt2 "%N screen shots saved to Media Gallery"
+
+rls_string STRING_r_dlg6_prompt3 "Video saved to Media Gallery"
+
+// usage text string 
+
+rls_string STRING_r_usage_msg "Please use the settings screen to define the capture mode and any other related settings such capture hotkey and saving format. Using the PNG format for screen shots is recommended, since it is compressed but lossless. The captures can be managed with the Media Gallery application.\n\nYou may start taking screenshots or capturing video now. Please press the Applications key to go back to the Application menu or send this application to the background via the Options menu. To be able to take screenshots or capture video, this applications needs to stay running in the background.\n"
+
+
+// End of File

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Decoded by SVGB to SVG converter version 0.9.5 -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="Слой_1" x="0" y="0" width="96" height="96" viewBox="0 0 96 96" xml:space="preserve">
+  <path opacity="0.4" d="M88,49C88,78.635,77.637,89,48,89C18.365,89,8,78.635,8,49C8,19.366,18.365,9,48,9C77.637,9,88,19.366,88,49z"/>
+  <rect fill="none" width="96" height="96"/>
+  <linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="107.3765" y1="4880.0386" x2="107.3765" y2="4960.7334" gradientTransform="matrix(1 0 0 1 -59.3765 -4871.5044)">
+    <stop offset="0" stop-color="#2B302B"/>
+    <stop offset="1" stop-color="#636969"/>
+  </linearGradient>
+  <path fill="url(#SVGID_1_)" d="M88,48C88,77.635,77.637,88,48,88C18.365,88,8,77.635,8,48C8,18.366,18.365,8,48,8C77.637,8,88,18.366,88,48z"/>
+  <g id="g16387" transform="matrix(0.9339 0 0 0.9392 36.627 -3.3755)">
+    <g id="g14545" transform="matrix(1.0024 0 0 1.0196 -19.441 89.0346)">
+      <rect id="rect11835" x="4.838" y="-62.211" fill="#D5D5D5" stroke="#000000" stroke-width="0.2788" width="26.782" height="32.306"/>
+      <rect id="rect12722" x="4.942" y="-55.56" fill="#0000C8" width="26.586" height="2.858"/>
+    </g>
+    <rect id="rect14551" x="-9.936" y="29.734" fill="#D5D5D5" stroke="#000000" stroke-width="0.2788" width="26.846" height="32.939"/>
+    <rect id="rect14553" x="-9.833" y="36.516" fill="#0000C8" width="26.65" height="2.914"/>
+    <rect id="rect14559" x="-4.805" y="34.047" fill="#D5D5D5" stroke="#000000" stroke-width="0.2819" width="26.846" height="32.939"/>
+    <rect id="rect14561" x="-4.701" y="40.829" fill="#0000C8" width="26.65" height="2.914"/>
+  </g>
+  <g id="g25295" transform="matrix(1 0 0 0.9806 0 1.5763)">
+    <rect id="rect2069" x="47.408" y="42.369" fill="#D03543" stroke="#D03543" stroke-width="9.2685" stroke-linejoin="round" width="23.995" height="27.317"/>
+    <path id="rect2956" fill="#D5D5D5" stroke="#D5D5D5" stroke-width="0.668" stroke-linejoin="round" d="M45.995,41.172L46.675,41.172L46.675,41.846L45.995,41.846L45.995,41.172z"/>
+    <path id="path6507" fill="#D5D5D5" stroke="#D5D5D5" stroke-width="0.668" stroke-linejoin="round" d="M72.32,40.959L73,40.959L73,41.633L72.32,41.633L72.32,40.959z"/>
+    <rect id="rect8279" x="48.416" y="39.15" fill="#D5D5D5" width="22.324" height="16.721"/>
+    <rect id="rect9166" x="52.566" y="60.107" fill="#D5D5D5" stroke="#D5D5D5" stroke-width="2.6286" stroke-linejoin="round" width="14.274" height="11.814"/>
+    <rect id="rect10053" x="53.998" y="59.989" fill="#D03543" width="4.651" height="11.618"/>
+  </g>
+  <g id="g27079" transform="matrix(1 0 0 1 -0.2737 -5.8977)">
+    <path id="path19082" fill="none" stroke="#000000" stroke-width="4.2482" d="M27.017,50.654L27.017,62.126L39.957,62.126"/>
+    <path id="path21741" fill="none" stroke="#000000" stroke-width="4.2482" d="M34.846,55.374L41.18,62.112L35.268,68.663"/>
+  </g>
+</svg>

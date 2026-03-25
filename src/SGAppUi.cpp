@@ -114,23 +114,29 @@ void CScreenGrabberAppUi::HandleCommandL(TInt aCommand)
         // a normal way to close an application
         case EAknCmdExit:
         case EEikCmdExit: 
-			{
-            CAknQueryDialog* exitQuery = CAknQueryDialog::NewL();
-            exitQuery->SetPromptL(_L("Stop taking screen shots and exit?"));
-            if (exitQuery->ExecuteLD(R_MY_GENERAL_CONFIRMATION_QUERY))
-                {
-                // pressed yes, exit
-		        Exit();
+	{
+	    
+            if (IsForeground())
+	    {
+		CAknQueryDialog* exitQuery = CAknQueryDialog::NewL();
+		HBufC* prompt = iCoeEnv->AllocReadResourceLC(R_EXIT_CONFIRMATION_QUERY_PROMPT);
+            
+		exitQuery->SetPromptL(*prompt);  
+	    
+		CleanupStack::PopAndDestroy(prompt);
+            if (exitQuery->ExecuteLD(R_MY_GENERAL_CONFIRMATION_QUERY)){
+		// pressed yes, exit
+		Exit();
                 }
-            else
-                {
-                // pressed no, do nothing
-                }
-			}
-            break;
+	    }
+	    // Got Exit request from the taskman ?
+	    else { Exit(); }
+	    
 
-        default:
-            break;      
+	}
+        break;
+
+    default: break;      
         }
     }
 

@@ -1,0 +1,27 @@
+/*
+============================================================================
+ Name		: ScreenGrabber2.rls
+ Author	  : JigokuMaster
+ Copyright   : Your copyright notice
+ Description : This is a localisation file for Squirrel
+				A .rls file is the one and only place where the logical
+				strings to be localised are defined. 
+============================================================================
+*/
+
+
+//  LOCALISATION STRINGS
+
+#ifdef LANGUAGE_SC
+#include "ScreenGrabber2_01.rls"   // default U.K. English
+#elif defined LANGUAGE_01
+/*
+#include "ScreenGrabber2_01.rls"   // U.K. English
+#elif defined LANGUAGE_09
+#include "ScreenGrabber2_09.rls"   // Finnish
+#elif defined LANGUAGE_31
+#include "ScreenGrabber2_31.rls"   // PRC Chinese
+#elif defined LANGUAGE_32
+#include "ScreenGrabber2_32.rls"   // Japanese
+*/
+#endif

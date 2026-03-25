@@ -37,6 +37,301 @@
 #include <akndef.h>
 
 
+#include <aknmessagequerydialog.h>
+#include <aknmessagequerycontrol.h>
+#include <aknnotewrappers.h>
+#include <eikfrlbd.h>
+#include <avkon.mbg>
+#include <akniconarray.h>
+#include <aknconsts.h>
+#include <aknlists.h>
+#include <aknpopup.h>
+#include <bautils.h>
+#include <akncommondialogs.h>
+#include <caknfileselectiondialog.h>
+
+class HotkeyPickerDialog: public CAknMessageQueryDialog
+{
+
+public:
+    TUint iInternalKeyValue;
+    TUint& iExternalKeyValue;
+
+public:
+    HotkeyPickerDialog(TUint &aKeyValue) : CAknMessageQueryDialog(ENoTone), iExternalKeyValue(aKeyValue)
+    {
+	iInternalKeyValue = 0;
+    }
+
+    void UpdateMessageTextL(TDesC &aText)
+    {
+	CAknMessageQueryControl* c = (CAknMessageQueryControl*)ControlOrNull(EAknMessageQueryContentId);
+	if (c)
+	{
+	    c->SetMessageTextL(&aText);
+	    DrawNow();
+	}
+    }
+
+    void UpdateMessageTextL(TUint aKeyValue)
+    {
+	TBuf<64> msg;
+	msg.Format(_L("scancode: 0x%x"), aKeyValue);
+	UpdateMessageTextL(msg);
+
+    }
+   
+    TBool OkToExitL(TInt aButton)
+    {
+	if ((aButton == EAknSoftkeyOk) && iInternalKeyValue) iExternalKeyValue = iInternalKeyValue;
+	return CAknMessageQueryDialog::OkToExitL(aButton);
+    }
+
+    TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType)
+    {
+	TUint scanCode = aKeyEvent.iScanCode;
+	if ((scanCode != EStdKeyDevice0) && (scanCode != EStdKeyDevice1) && (scanCode != EStdKeyDevice3) )
+	{
+
+	    if (aType == EEventKeyDown){
+		iInternalKeyValue = scanCode;
+		UpdateMessageTextL(scanCode); 
+	    }
+	}
+
+	return EKeyWasConsumed;
+    }
+
+    static void ExecuteLD(TUint aCurrentKey, TUint &aKeyValue)
+    {
+	HotkeyPickerDialog* dlg = new (ELeave) HotkeyPickerDialog(aKeyValue);
+	dlg->PrepareLC(R_SCREENGRABBER_HOTKEYPICKER_DIALOG);
+	dlg->UpdateMessageTextL(aCurrentKey);
+	dlg->RunLD();
+    }
+ 
+};
+
+
+class CHotkeySettingItem: public CAknEnumeratedTextPopupSettingItem
+{
+public:    
+    CHotkeySettingItem(TInt aResourceId, TInt& aValue, TGrabSettings& aGrabSettings, CScreenGrabberModel* aModel):
+	CAknEnumeratedTextPopupSettingItem(aResourceId, aValue),
+	iGrabSettings(aGrabSettings),
+	iSGModel(aModel){};
+
+    // From MAknSettingPageObserver
+    virtual void HandleSettingPageEventL(CAknSettingPage* aSettingPage,TAknSettingPageEvent aEventType);
+
+
+private:
+    TGrabSettings& iGrabSettings;
+    CScreenGrabberModel* iSGModel;
+};
+
+
+void CHotkeySettingItem::HandleSettingPageEventL(CAknSettingPage* aSettingPage,TAknSettingPageEvent aEventType)
+{
+
+    TInt currentIndex = QueryValue()->CurrentValueIndex();
+    if (aEventType == EEventSettingOked  && currentIndex == ECustomHotkey)
+    {
+
+	iSGModel->StopCapturing();
+	iSGModel->CaptureAllKeys();
+
+	TUint currentKey = iSGModel->GrabSettings().iCustomCaptureHotkey;
+	HotkeyPickerDialog::ExecuteLD(currentKey, iGrabSettings.iCustomCaptureHotkey);
+	iSGModel->CancelCaptureAllKeys();
+
+    }
+}
+
+
+class CSavePathSettingItem: public CAknTextSettingItem
+{
+public:    
+    CSavePathSettingItem(TInt aResourceId, TDes &aValue):CAknTextSettingItem(aResourceId, aValue)
+    {
+	//iOldPath.Copy(aValue);
+    };
+
+    virtual void EditItemL(TBool aCalledFromMenu);
+    virtual void HandleSettingPageEventL(CAknSettingPage* aSettingPage,TAknSettingPageEvent aEventType);
+    TBool SelectDrivePathL(TDes &aPath);
+    TBool SelectPathL(TDes &aPath);
+private:
+    TFileName iOldPath;
+
+};
+
+
+void CSavePathSettingItem::HandleSettingPageEventL(CAknSettingPage* aSettingPage, TAknSettingPageEvent aEventType)
+{
+
+    if (aEventType == EEventSettingCancelled)
+    {
+	InternalTextPtr().Copy(iOldPath);
+    }
+}
+
+TBool CSavePathSettingItem::SelectDrivePathL(TDes &aPath)
+{
+
+    CAknDoubleLargeGraphicPopupMenuStyleListBox* list;
+
+    list = new(ELeave) CAknDoubleLargeGraphicPopupMenuStyleListBox;  
+    CleanupStack::PushL(list);
+
+    CAknPopupList* popupList;
+    popupList = CAknPopupList::NewL(list, R_AVKON_SOFTKEYS_SELECT_CANCEL, AknPopupLayouts::EMenuDoubleLargeGraphicWindow);   
+    CleanupStack::PushL(popupList);
+
+    HBufC* title = CCoeEnv::Static()->AllocReadResourceLC(R_SAVEPATHSELECTION_DIALOG_TITLE);
+
+    popupList->SetTitleL(*title);
+    CleanupStack::PopAndDestroy(title);
+
+    TInt flags = 0; // Initialize flag
+    list->ConstructL(popupList, flags);
+    list->CreateScrollBarFrameL(ETrue);
+    list->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff,CEikScrollBarFrame::EAuto);
+    CDesCArrayFlat* items = new CDesCArrayFlat(3);
+    CleanupStack::PushL(items);
+ 
+    CArrayPtr<CGulIcon>* icons =  new ( ELeave ) CAknIconArray(3);
+    CleanupStack::PushL(icons);
+
+    // Add drives
+    CDesCArrayFlat* driveList = new CDesCArrayFlat(3);
+    BaflUtils::GetDiskListL(CCoeEnv::Static()->FsSession(), *driveList);
+ 
+    //CleanupStack::PushL(driveList); // KERN-EXEC3 when this function returns!!
+   
+    TInt i;
+    TInt iconIndex = 0;
+    
+    if ( driveList->Find(_L("D"), i) == 0 )
+    {
+	    driveList->Delete(i);
+    }
+	
+    if ( driveList->Find(_L("Z"), i) == 0 )
+    {
+	driveList->Delete(i);
+    }
+
+    for (i = 0; i < driveList->MdcaCount(); i++)
+    {
+
+	TPtrC d = driveList->MdcaPoint(i); 
+	
+	TBuf<3> root(d);
+	root.Append(_L(":\\"));
+	TBool rootOK(EFalse);
+
+	if (BaflUtils::PathExists(CCoeEnv::Static()->FsSession(), root))
+	{
+	    
+	    TBool isRO(EFalse); 
+	    if (BaflUtils::DiskIsReadOnly(CCoeEnv::Static()->FsSession(), root, isRO) == KErrNone)
+	    {
+		rootOK = !isRO;	
+	    }
+    
+	}
+
+	if (!rootOK)
+	{
+	    driveList->Delete(i);
+	    continue;
+	}
+
+	TBuf<10> item;
+	item.Format(_L("%d\t%S\t"), iconIndex, &d);
+	
+	iconIndex++;
+	items->AppendL(item);
+	
+	CFbsBitmap *bm, *mask;
+	if (d[0] == 'F' || d[0] == 'E')
+	{
+	    AknIconUtils::CreateIconL(bm, mask, AknIconUtils::AvkonIconFileName(), EMbmAvkonQgn_prop_mmc_memc_large, EMbmAvkonQgn_prop_mmc_memc_large_mask);
+  
+	}
+
+	else
+	{
+    
+	    AknIconUtils::CreateIconL(bm, mask, AknIconUtils::AvkonIconFileName(), EMbmAvkonQgn_prop_phone_memc_large, EMbmAvkonQgn_prop_phone_memc_mask);
+    
+	}
+	icons->AppendL(CGulIcon::NewL(bm, mask));	
+    }
+
+    CTextListBoxModel* model = list->Model();
+    model->SetItemTextArray(items);
+    model->SetOwnershipType(ELbmOwnsItemArray);
+    CleanupStack::Pop(items);
+
+    list->ItemDrawer()->FormattedCellData()->SetIconArrayL(icons);
+    CleanupStack::Pop(icons);
+    
+    TInt popupOk = popupList->ExecuteLD();
+    CleanupStack::Pop(popupList);
+
+    if (popupOk)
+    {
+
+    	TInt index = list->CurrentItemIndex();
+	aPath.Copy(driveList->MdcaPoint(index));
+	aPath.Append(_L(":\\"));
+	
+    }
+
+    CleanupStack::PopAndDestroy(list); // list
+    delete driveList;
+    //CleanupStack::PopAndDestroy(driveList); 
+    return popupOk;   
+}
+
+
+
+TBool CSavePathSettingItem::SelectPathL(TDes& aPath)
+{
+
+    if (!SelectDrivePathL(aPath)) 
+    {
+	return EFalse;
+    }
+
+    CAknFileSelectionDialog* d = CAknFileSelectionDialog::NewL(ECFDDialogTypeSave, R_SAVEPATHSELECTION_DIALOG);
+    CleanupStack::PushL(d);
+
+    TBool ok = d->ExecuteL(aPath);
+    CleanupStack::PopAndDestroy(d);
+    return ok;
+}
+
+
+
+void CSavePathSettingItem::EditItemL(TBool aCalledFromMenu)
+{
+    
+    TFileName path;   
+    if (SelectPathL(path))
+    {
+
+	iOldPath.Copy(InternalTextPtr());
+	InternalTextPtr().Copy(path);
+	CAknTextSettingItem::EditItemL(aCalledFromMenu);
+    }
+
+}
+
+
+
 // ================= MEMBER FUNCTIONS =======================
 
 // ---------------------------------------------------------
@@ -51,7 +346,12 @@ void CScreenGrabberSettingListContainer::ConstructL(const TRect& aRect)
     // set title of the app
     CEikStatusPane* statusPane = iEikonEnv->AppUiFactory()->StatusPane();
     CAknTitlePane* title = static_cast<CAknTitlePane*>( statusPane->ControlL( TUid::Uid( EEikStatusPaneUidTitle ) ) );
-    title->SetTextL( _L("Settings") );
+
+    HBufC* titleText = iCoeEnv->AllocReadResourceLC(R_SETTINGS_TITLE);
+
+    title->SetTextL(*titleText);
+    CleanupStack::PopAndDestroy(titleText);
+
 
     // get an instance of the engine
     iModel = static_cast<CScreenGrabberDocument*>(reinterpret_cast<CEikAppUi*>(iEikonEnv->AppUi())->Document())->Model();
@@ -98,28 +398,23 @@ CAknSettingItem* CScreenGrabberSettingListContainer::CreateSettingItemL( TInt aI
             break;
 
         case ESettingListSingleCaptureHotkeySelection:
-            settingItem = new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iGrabSettings.iSingleCaptureHotkey);
-            break;
-        
+            //settingItem = new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iGrabSettings.iSingleCaptureHotkey);
+            settingItem = new (ELeave) CHotkeySettingItem(aIdentifier, iGrabSettings.iSingleCaptureHotkey, iGrabSettings, iModel);	    
+	    break;
+ 
+   
         case ESettingListSingleCaptureImageFormatSelection:
             settingItem = new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iGrabSettings.iSingleCaptureImageFormat);
             break;
         
-        case ESettingListSingleCaptureMemorySelection:
-#ifdef SCREENGRABBER_MULTIDRIVE_SUPPORT
-            settingItem = new(ELeave) CAknMemorySelectionSettingItemMultiDrive(aIdentifier, iGrabSettings.iSingleCaptureMemoryInUseMultiDrive);
-#else
-            settingItem = new(ELeave) CAknMemorySelectionSettingItem(aIdentifier, iGrabSettings.iSingleCaptureMemoryInUse);
-#endif
-            break;
-
         case ESettingListSingleCaptureFileNameSelection:
             settingItem = new(ELeave) CAknTextSettingItem(aIdentifier, iGrabSettings.iSingleCaptureFileName);
             break;
 
 
         case ESettingListSequantialCaptureHotkeySelection:
-            settingItem = new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iGrabSettings.iSequantialCaptureHotkey);
+            //settingItem = new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iGrabSettings.iSequantialCaptureHotkey);
+	    settingItem = new(ELeave) CHotkeySettingItem(aIdentifier, iGrabSettings.iSequantialCaptureHotkey, iGrabSettings, iModel);    
             break;
         
         case ESettingListSequantialCaptureImageFormatSelection:
@@ -129,40 +424,28 @@ CAknSettingItem* CScreenGrabberSettingListContainer::CreateSettingItemL( TInt aI
         case ESettingListSequantialCaptureDelaySelection:
             settingItem = new(ELeave) CAknIntegerEdwinSettingItem(aIdentifier, iGrabSettings.iSequantialCaptureDelay);
             break;
-                    
-        case ESettingListSequantialCaptureMemorySelection:
-#ifdef SCREENGRABBER_MULTIDRIVE_SUPPORT
-            settingItem = new(ELeave) CAknMemorySelectionSettingItemMultiDrive(aIdentifier, iGrabSettings.iSequantialCaptureMemoryInUseMultiDrive);
-#else
-            settingItem = new(ELeave) CAknMemorySelectionSettingItem(aIdentifier, iGrabSettings.iSequantialCaptureMemoryInUse);
-#endif
-            break;
-
         case ESettingListSequantialCaptureFileNameSelection:
             settingItem = new(ELeave) CAknTextSettingItem(aIdentifier, iGrabSettings.iSequantialCaptureFileName);
             break;
 
 
         case ESettingListVideoCaptureHotkeySelection:
-            settingItem = new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iGrabSettings.iVideoCaptureHotkey);
+            //settingItem = new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iGrabSettings.iVideoCaptureHotkey);
+	    settingItem = new(ELeave) CHotkeySettingItem(aIdentifier, iGrabSettings.iVideoCaptureHotkey, iGrabSettings, iModel);    
             break;
         
         case ESettingListVideoCaptureVideoFormatSelection:
             settingItem = new(ELeave) CAknEnumeratedTextPopupSettingItem(aIdentifier, iGrabSettings.iVideoCaptureVideoFormat);
             break;
         
-        case ESettingListVideoCaptureMemorySelection:
-#ifdef SCREENGRABBER_MULTIDRIVE_SUPPORT
-            settingItem = new(ELeave) CAknMemorySelectionSettingItemMultiDrive(aIdentifier, iGrabSettings.iVideoCaptureMemoryInUseMultiDrive);
-#else
-            settingItem = new(ELeave) CAknMemorySelectionSettingItem(aIdentifier, iGrabSettings.iVideoCaptureMemoryInUse);
-#endif
-            break;
-
         case ESettingListVideoCaptureFileNameSelection:
             settingItem = new(ELeave) CAknTextSettingItem(aIdentifier, iGrabSettings.iVideoCaptureFileName);
             break;
 
+	case ESettingListSavePathSelection:
+	    settingItem = new (ELeave) CSavePathSettingItem(aIdentifier, iGrabSettings.iSavePath);
+            break;
+ 
         }
 
     return settingItem;
@@ -238,17 +521,16 @@ void CScreenGrabberSettingListContainer::SetVisibilitiesOfSettingItems()
             {
             ((*SettingItemArray())[ESettingListSingleCaptureHotkeySelection])->SetHidden(EFalse);
             ((*SettingItemArray())[ESettingListSingleCaptureImageFormatSelection])->SetHidden(EFalse);
-            ((*SettingItemArray())[ESettingListSingleCaptureMemorySelection])->SetHidden(EFalse);
-            ((*SettingItemArray())[ESettingListSingleCaptureFileNameSelection])->SetHidden(EFalse);
+           
+	    ((*SettingItemArray())[ESettingListSingleCaptureFileNameSelection])->SetHidden(EFalse);
             ((*SettingItemArray())[ESettingListSequantialCaptureHotkeySelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSequantialCaptureImageFormatSelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSequantialCaptureDelaySelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListSequantialCaptureMemorySelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSequantialCaptureFileNameSelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListVideoCaptureHotkeySelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListVideoCaptureVideoFormatSelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListVideoCaptureMemorySelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListVideoCaptureFileNameSelection])->SetHidden(ETrue);
+           
+	    ((*SettingItemArray())[ESettingListVideoCaptureFileNameSelection])->SetHidden(ETrue);
             }
             break;
         
@@ -256,17 +538,15 @@ void CScreenGrabberSettingListContainer::SetVisibilitiesOfSettingItems()
             {
             ((*SettingItemArray())[ESettingListSingleCaptureHotkeySelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSingleCaptureImageFormatSelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListSingleCaptureMemorySelection])->SetHidden(ETrue);
+
             ((*SettingItemArray())[ESettingListSingleCaptureFileNameSelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSequantialCaptureHotkeySelection])->SetHidden(EFalse);
             ((*SettingItemArray())[ESettingListSequantialCaptureImageFormatSelection])->SetHidden(EFalse);
-            ((*SettingItemArray())[ESettingListSequantialCaptureDelaySelection])->SetHidden(EFalse);
-            ((*SettingItemArray())[ESettingListSequantialCaptureMemorySelection])->SetHidden(EFalse);
-            ((*SettingItemArray())[ESettingListSequantialCaptureFileNameSelection])->SetHidden(EFalse);
+            ((*SettingItemArray())[ESettingListSequantialCaptureDelaySelection])->SetHidden(EFalse);            ((*SettingItemArray())[ESettingListSequantialCaptureFileNameSelection])->SetHidden(EFalse);
             ((*SettingItemArray())[ESettingListVideoCaptureHotkeySelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListVideoCaptureVideoFormatSelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListVideoCaptureMemorySelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListVideoCaptureFileNameSelection])->SetHidden(ETrue);
+           
+	    ((*SettingItemArray())[ESettingListVideoCaptureFileNameSelection])->SetHidden(ETrue);
             }
             break;            
 
@@ -274,16 +554,15 @@ void CScreenGrabberSettingListContainer::SetVisibilitiesOfSettingItems()
             {
             ((*SettingItemArray())[ESettingListSingleCaptureHotkeySelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSingleCaptureImageFormatSelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListSingleCaptureMemorySelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListSingleCaptureFileNameSelection])->SetHidden(ETrue);
+                       
+	    ((*SettingItemArray())[ESettingListSingleCaptureFileNameSelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSequantialCaptureHotkeySelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSequantialCaptureImageFormatSelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSequantialCaptureDelaySelection])->SetHidden(ETrue);
-            ((*SettingItemArray())[ESettingListSequantialCaptureMemorySelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListSequantialCaptureFileNameSelection])->SetHidden(ETrue);
             ((*SettingItemArray())[ESettingListVideoCaptureHotkeySelection])->SetHidden(EFalse);
             ((*SettingItemArray())[ESettingListVideoCaptureVideoFormatSelection])->SetHidden(EFalse);
-            ((*SettingItemArray())[ESettingListVideoCaptureMemorySelection])->SetHidden(EFalse);
+
             ((*SettingItemArray())[ESettingListVideoCaptureFileNameSelection])->SetHidden(EFalse);
             }
             break;             

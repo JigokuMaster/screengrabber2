@@ -31,14 +31,14 @@
 #include  "SGDocument.h" 
 #include  "SGModel.h"
 
-/*
+
 #ifdef SCREENGRABBER_SCREEN_RESOLUTION_CHANGE_SUPPORT
  #include <AknSgcc.h>
  #include <AknLayoutConfig.h>
  #include <e32property.h>
  #include <UikonInternalPSKeys.h>
 #endif
-*/
+
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -84,40 +84,7 @@ TUid CScreenGrabberMainView::Id() const
 // ---------------------------------------------------------
 //
 
-void CScreenGrabberMainView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane)
-{
 
-    if (aResourceId == R_SCREENGRABBER_RESOLUTION_SUBMENU)
-    {
-        CWsScreenDevice* screenDevice = CEikonEnv::Static()->ScreenDevice();
-
-	for (TInt i=0; i < screenDevice->NumScreenModes(); i++)
-	{
-	    TPixelsAndRotation SizeAndRotation;
-	    
-	    TInt bpp = TDisplayModeUtils::NumDisplayModeBitsPerPixel(screenDevice->GetScreenModeDisplayMode(i));
-	    
-	    screenDevice->GetScreenModeSizeAndRotation(i, SizeAndRotation);
-	    
-	    TSize res = SizeAndRotation.iPixelSize;
-
-	    // generate new menu text
-            TBuf<64> menuText;
-            menuText.Format(_L("%dx%d (%dbits)"), res.iWidth, res.iHeight, bpp);
-            // create new menu item
-            CEikMenuPaneItem::SData menuItem;
-            menuItem.iFlags = 0;
-            menuItem.iText = menuText;
-            menuItem.iCommandId = EScreenGrabberCmdScreenResolutionItem1 + i;
-            menuItem.iCascadeId = 0;
-            aMenuPane->AddMenuItemL(menuItem);
-    
-	}
- 
-    }
-}
-
-#if 0 
 void CScreenGrabberMainView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane)
 {
   
@@ -163,7 +130,6 @@ void CScreenGrabberMainView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aM
         }
    
     }
-#endif 
 
 #endif // SCREENGRABBER_SCREEN_RESOLUTION_CHANGE_SUPPORT
     
@@ -197,14 +163,7 @@ void CScreenGrabberMainView::HandleCommandL(TInt aCommand)
         case EScreenGrabberCmdScreenResolutionItem11:
         case EScreenGrabberCmdScreenResolutionItem12:
         {
-            CWsScreenDevice* screenDevice = CEikonEnv::Static()->ScreenDevice();
-            TInt screenMode = aCommand-EScreenGrabberCmdScreenResolutionItem1;
-	    //screenDevice->SetScreenMode(screenMode);
-	    TPixelsAndRotation SizeAndRotation;
-	    screenDevice->GetScreenModeSizeAndRotation(screenMode, SizeAndRotation);
-	    screenDevice->SetScreenSizeAndRotation(SizeAndRotation);
-
-#if 0		
+	
             // change resolution
             const CAknLayoutConfig& config = CAknSgcClient::LayoutConfig();
             const CAknLayoutConfig::THardwareStateArray& hwStates = config.HardwareStates();
@@ -219,7 +178,7 @@ void CScreenGrabberMainView::HandleCommandL(TInt aCommand)
             err = RProperty::Set(KPSUidUikon, KUikLayoutState, state);
 
             screenDevice->SetScreenMode(screenMode);
-#endif
+
             break;	    
             }
 #endif

@@ -21,7 +21,7 @@
 #include "SGApp.h"
 #include "SG.hrh"
 #include "SGGifAnimator.h"
-
+#include "SGNewFormats.h"
 #include <w32std.h>
 #include <e32keys.h>
 #include <imageconversion.h>
@@ -33,11 +33,9 @@
 #include <coeutils.h>
 #include <s32file.h>
 #include <AknGlobalNote.h>
+#include <stringloader.h>
+#include <ScreenGrabber2.rsg>
 
-
-_LIT(KSingleShotSaved, "Screen shot saved to Media Gallery");
-_LIT(KMultipleShotsSaved, "%u screen shots saved to Media Gallery");
-_LIT(KVideoSaved, "Video saved to Media Gallery");
 _LIT(KErrorOccured, "Grabber error: ");
 _LIT(KDefaultImageFileName, "Shot");
 _LIT(KDefaultVideoFileName, "Video");
@@ -75,29 +73,28 @@ CScreenGrabberModel::CScreenGrabberModel() : CActive(EPriorityStandard)
 
 void CScreenGrabberModel::ConstructL()
 	{
-    User::LeaveIfError(iTimer.CreateLocal());
 
-    // init audio utility
+	User::LeaveIfError(iTimer.CreateLocal());
+
+	// init audio utility
   	iMdaAudioToneUtility = CMdaAudioToneUtility::NewL(*this);
 
-    iSavedQuery = CSavedQuery::NewL();
-    iVideoFrameArray = new(ELeave) CVideoFrameArray(10000);
+	iSavedQuery = CSavedQuery::NewL();
+	iVideoFrameArray = new(ELeave) CVideoFrameArray(10000);
 
 	iPreviouslyCapturedBitmap = new(ELeave) CFbsBitmap;
 
-    iEnv = CEikonEnv::Static();
+	iEnv = CEikonEnv::Static();
   	iRootWin = iEnv->RootWin();
   	iCapturingInProgress = EFalse;
-  	iStopCapturing = EFalse;
+  	iStopCapturing = ETrue;
   	iNumberOfTakenShots = 0;
   	iCurrentFrameNumber = 0;
   	iHashKeyCapturingActivated = EFalse;
   	iHashKeyDown = EFalse;
   	iGalleryUpdaterSupported = ETrue;
   	iGalleryUpdaterInitialized = EFalse;
-
 	CheckSecondScreen();
-
 	CActiveScheduler::Add(this);
 	}
 
@@ -120,7 +117,7 @@ void CScreenGrabberModel::ActivateModelL()
 void CScreenGrabberModel::DeActivateModelL()
 	{
     CancelCapturing();
-
+ 
     // for a faster exit, send the application to background
     TApaTask selfTask(iEnv->WsSession());
     selfTask.SetWgId(iEnv->RootWin().Identifier());
@@ -158,11 +155,21 @@ CScreenGrabberModel::~CScreenGrabberModel()
     delete iVideoFrameArray;
 
     delete iSavedQuery;
-
-    delete iMdaAudioToneUtility;
     }
 
 // ---------------------------------------------------------------------------
+
+void CScreenGrabberModel::LoadDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, TUint& aValue)
+    {
+    if (aDicFS->IsPresentL(aUid))
+        {
+        RDictionaryReadStream in;
+        in.OpenLC(*aDicFS, aUid);
+        aValue = in.ReadUint32L();
+        CleanupStack::PopAndDestroy(); // in        
+        }
+    }
+
 
 void CScreenGrabberModel::LoadDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, TInt& aValue)
     {
@@ -191,6 +198,16 @@ void CScreenGrabberModel::LoadDFSValueL(CDictionaryFileStore* aDicFS, const TUid
 
 // ---------------------------------------------------------------------------
 
+void CScreenGrabberModel::SaveDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, const TUint& aValue)
+    {
+    RDictionaryWriteStream out;
+    out.AssignLC(*aDicFS, aUid);
+    out.WriteUint32L(aValue);
+    out.CommitL(); 	
+    CleanupStack::PopAndDestroy(1);// out
+    }
+
+
 void CScreenGrabberModel::SaveDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, const TInt& aValue)
     {
     RDictionaryWriteStream out;
@@ -211,7 +228,7 @@ void CScreenGrabberModel::SaveDFSValueL(CDictionaryFileStore* aDicFS, const TUid
     out.CommitL(); 	
     CleanupStack::PopAndDestroy(1);// out
     }
-    
+
 // ---------------------------------------------------------------------------
 
 void CScreenGrabberModel::LoadSettingsL()
@@ -220,27 +237,25 @@ void CScreenGrabberModel::LoadSettingsL()
     iGrabSettings.iCaptureMode = ECaptureModeSingleCapture;
     
     iGrabSettings.iScreenDevice = 0;
-   
+    iGrabSettings.iCustomCaptureHotkey = 0;
     iGrabSettings.iSingleCaptureHotkey = EHotkeySendKey;
     iGrabSettings.iSingleCaptureImageFormat = EImageFormatPNG;
-    iGrabSettings.iSingleCaptureMemoryInUse = CAknMemorySelectionSettingPage::EPhoneMemory; 
-    iGrabSettings.iSingleCaptureMemoryInUseMultiDrive = EDriveC;
     iGrabSettings.iSingleCaptureFileName.Copy( KDefaultImageFileName );
 
     iGrabSettings.iSequantialCaptureHotkey = EHotkeySendKey;
     iGrabSettings.iSequantialCaptureImageFormat = EImageFormatPNG;
     iGrabSettings.iSequantialCaptureDelay = DEFAULT_SEQ_CAPTURE_DELAY_MS;
-    iGrabSettings.iSequantialCaptureMemoryInUse = CAknMemorySelectionSettingPage::EPhoneMemory; 
-    iGrabSettings.iSequantialCaptureMemoryInUseMultiDrive = EDriveC;
     iGrabSettings.iSequantialCaptureFileName.Copy( KDefaultImageFileName );
 
     iGrabSettings.iVideoCaptureHotkey = EHotkeySendKey;
     iGrabSettings.iVideoCaptureVideoFormat = EVideoFormatAnimatedGIF;
-    iGrabSettings.iVideoCaptureMemoryInUse = CAknMemorySelectionSettingPage::EPhoneMemory; 
-    iGrabSettings.iVideoCaptureMemoryInUseMultiDrive = EDriveC;
+
     iGrabSettings.iVideoCaptureFileName.Copy( KDefaultVideoFileName );
        
-        
+    iGrabSettings.iSavePath.Copy(PathInfo::PhoneMemoryRootPath());
+    iGrabSettings.iSavePath.Append(PathInfo::ImagesPath());  
+    iGrabSettings.iSavePath.Append(KScreenShotsSubDirectory);
+     
     // make sure that the private path of this app in c-drive exists
     iEnv->FsSession().CreatePrivatePath( KSettingsDrive ); 
     
@@ -257,22 +272,25 @@ void CScreenGrabberModel::LoadSettingsL()
 
         LoadDFSValueL(settingsStore, KSGSettingSingleCaptureHotkey,                     iGrabSettings.iSingleCaptureHotkey);
         LoadDFSValueL(settingsStore, KSGSettingSingleCaptureImageFormat,                iGrabSettings.iSingleCaptureImageFormat);
-        LoadDFSValueL(settingsStore, KSGSettingSingleCaptureMemoryInUse,                (TInt&)iGrabSettings.iSingleCaptureMemoryInUse);
-        LoadDFSValueL(settingsStore, KSGSettingSingleCaptureMemoryInUseMultiDrive,      (TInt&)iGrabSettings.iSingleCaptureMemoryInUseMultiDrive);
+
         LoadDFSValueL(settingsStore, KSGSettingSingleCaptureFileName,                   iGrabSettings.iSingleCaptureFileName);
         
         LoadDFSValueL(settingsStore, KSGSettingSequantialCaptureHotkey,                 iGrabSettings.iSequantialCaptureHotkey);
         LoadDFSValueL(settingsStore, KSGSettingSequantialCaptureImageFormat,            iGrabSettings.iSequantialCaptureImageFormat);
         LoadDFSValueL(settingsStore, KSGSettingSequantialCaptureDelay,                  iGrabSettings.iSequantialCaptureDelay);
-        LoadDFSValueL(settingsStore, KSGSettingSequantialCaptureMemoryInUse,            (TInt&)iGrabSettings.iSequantialCaptureMemoryInUse);
-        LoadDFSValueL(settingsStore, KSGSettingSequantialCaptureMemoryInUseMultiDrive,  (TInt&)iGrabSettings.iSequantialCaptureMemoryInUseMultiDrive);
-        LoadDFSValueL(settingsStore, KSGSettingSequantialCaptureFileName,               iGrabSettings.iSequantialCaptureFileName);
+
+       
+	LoadDFSValueL(settingsStore, KSGSettingSequantialCaptureFileName,               iGrabSettings.iSequantialCaptureFileName);
 
         LoadDFSValueL(settingsStore, KSGSettingVideoCaptureHotkey,                      iGrabSettings.iVideoCaptureHotkey);
         LoadDFSValueL(settingsStore, KSGSettingVideoCaptureVideoFormat,                 iGrabSettings.iVideoCaptureVideoFormat);
-        LoadDFSValueL(settingsStore, KSGSettingVideoCaptureMemoryInUse,                 (TInt&)iGrabSettings.iVideoCaptureMemoryInUse);
-        LoadDFSValueL(settingsStore, KSGSettingVideoCaptureMemoryInUseMultiDrive,       (TInt&)iGrabSettings.iVideoCaptureMemoryInUseMultiDrive);
-        LoadDFSValueL(settingsStore, KSGSettingVideoCaptureFileName,                    iGrabSettings.iVideoCaptureFileName);
+        
+       
+	LoadDFSValueL(settingsStore, KSGSettingVideoCaptureFileName,                    iGrabSettings.iVideoCaptureFileName);
+
+	LoadDFSValueL(settingsStore, KSGSettingCustomCaptureHotkey,                    iGrabSettings.iCustomCaptureHotkey);
+       
+	LoadDFSValueL(settingsStore, KSGSettingSavePath,                    iGrabSettings.iSavePath);
 
         CleanupStack::PopAndDestroy(); // settingsStore         
         }
@@ -305,23 +323,23 @@ void CScreenGrabberModel::SaveSettingsL(TGrabSettings aGrabSettings)
 
         SaveDFSValueL(settingsStore, KSGSettingSingleCaptureHotkey,                     iGrabSettings.iSingleCaptureHotkey);
         SaveDFSValueL(settingsStore, KSGSettingSingleCaptureImageFormat,                iGrabSettings.iSingleCaptureImageFormat);
-        SaveDFSValueL(settingsStore, KSGSettingSingleCaptureMemoryInUse,                (TInt&)iGrabSettings.iSingleCaptureMemoryInUse);
-        SaveDFSValueL(settingsStore, KSGSettingSingleCaptureMemoryInUseMultiDrive,      (TInt&)iGrabSettings.iSingleCaptureMemoryInUseMultiDrive);
-        SaveDFSValueL(settingsStore, KSGSettingSingleCaptureFileName,                   iGrabSettings.iSingleCaptureFileName);
+
+       
+	SaveDFSValueL(settingsStore, KSGSettingSingleCaptureFileName,                   iGrabSettings.iSingleCaptureFileName);
         
         SaveDFSValueL(settingsStore, KSGSettingSequantialCaptureHotkey,                 iGrabSettings.iSequantialCaptureHotkey);
         SaveDFSValueL(settingsStore, KSGSettingSequantialCaptureImageFormat,            iGrabSettings.iSequantialCaptureImageFormat);
         SaveDFSValueL(settingsStore, KSGSettingSequantialCaptureDelay,                  iGrabSettings.iSequantialCaptureDelay);
-        SaveDFSValueL(settingsStore, KSGSettingSequantialCaptureMemoryInUse,            (TInt&)iGrabSettings.iSequantialCaptureMemoryInUse);
-        SaveDFSValueL(settingsStore, KSGSettingSequantialCaptureMemoryInUseMultiDrive,  (TInt&)iGrabSettings.iSequantialCaptureMemoryInUseMultiDrive);
-        SaveDFSValueL(settingsStore, KSGSettingSequantialCaptureFileName,               iGrabSettings.iSequantialCaptureFileName);
+       
+	SaveDFSValueL(settingsStore, KSGSettingSequantialCaptureFileName,               iGrabSettings.iSequantialCaptureFileName);
 
         SaveDFSValueL(settingsStore, KSGSettingVideoCaptureHotkey,                      iGrabSettings.iVideoCaptureHotkey);
         SaveDFSValueL(settingsStore, KSGSettingVideoCaptureVideoFormat,                 iGrabSettings.iVideoCaptureVideoFormat);
-        SaveDFSValueL(settingsStore, KSGSettingVideoCaptureMemoryInUse,                 (TInt&)iGrabSettings.iVideoCaptureMemoryInUse);
-        SaveDFSValueL(settingsStore, KSGSettingVideoCaptureMemoryInUseMultiDrive,       (TInt&)iGrabSettings.iVideoCaptureMemoryInUseMultiDrive);
+
         SaveDFSValueL(settingsStore, KSGSettingVideoCaptureFileName,                    iGrabSettings.iVideoCaptureFileName);
-        
+	SaveDFSValueL(settingsStore, KSGSettingCustomCaptureHotkey,                    iGrabSettings.iCustomCaptureHotkey); 
+	SaveDFSValueL(settingsStore, KSGSettingSavePath,                    iGrabSettings.iSavePath); 
+
         settingsStore->CommitL();
         CleanupStack::PopAndDestroy(); // settingsStore             
         }
@@ -334,10 +352,41 @@ void CScreenGrabberModel::DoCancel()
     iTimer.Cancel();
 	}
 
+
+
+// ---------------------------------------------------------------------------
+
+static TInt32 kCapHandles[255];
+
+void CScreenGrabberModel::CaptureAllKeys()
+{
+    for (TInt i = 1; i<256; i++)
+    {
+	kCapHandles[i] = iRootWin.CaptureKeyUpAndDowns(i, EModifierCtrl|EModifierShift|EModifierFunc, 0, KEY_CAPTURE_PRIORITY);
+    }
+}
+
+
+// ---------------------------------------------------------------------------
+
+
+void CScreenGrabberModel::CancelCaptureAllKeys()
+{
+
+    for (TInt i = 1; i<256; i++)
+    {
+	TInt32 h = kCapHandles[i]; 
+	if (h >= 0) iRootWin.CancelCaptureKeyUpAndDowns(h);
+    }
+}
+
+
 // ---------------------------------------------------------------------------
 
 void CScreenGrabberModel::ActivateCaptureKeysL(TBool aChangeKey)
     {
+
+    iStopCapturing = EFalse;
     // if changing the capture key, capturing needs to be cancelled first
     if (aChangeKey)
         {
@@ -422,6 +471,15 @@ void CScreenGrabberModel::ActivateCaptureKeysL(TBool aChangeKey)
             iCapturedKeyUnD = iRootWin.CaptureKeyUpAndDowns(EStdKeyApplication1, EModifierCtrl|EModifierShift|EModifierFunc, 0, KEY_CAPTURE_PRIORITY);
            	break;
         	}  
+
+	case ECustomHotkey:
+	    {
+
+        	iCapturedKey   = iRootWin.CaptureKey(iGrabSettings.iCustomCaptureHotkey, 0, 0, KEY_CAPTURE_PRIORITY);
+		iCapturedKeyUnD = iRootWin.CaptureKeyUpAndDowns(iGrabSettings.iCustomCaptureHotkey, 0, 0, KEY_CAPTURE_PRIORITY);
+		break;
+	    
+        	} 	
         default:
             {
             User::Panic(_L("Key not supported"), 100);
@@ -430,7 +488,15 @@ void CScreenGrabberModel::ActivateCaptureKeysL(TBool aChangeKey)
         }
     }
 
+
+
 // ---------------------------------------------------------------------------
+
+void CScreenGrabberModel::StopCapturing()
+    {
+	// cancel all captures
+    iStopCapturing = ETrue;
+    }
 
 void CScreenGrabberModel::CancelCapturing()
     {
@@ -446,13 +512,15 @@ void CScreenGrabberModel::CancelCapturing()
         iHashKeyCapturingActivated = EFalse;
         }
     }
-
+ 
 // ---------------------------------------------------------------------------
 
 TBool CScreenGrabberModel::HandleCaptureCommandsL(const TWsEvent& aEvent)
     {
     TBool continueEventLoop(ETrue);
-    
+
+    if (iStopCapturing) return continueEventLoop; // used to stop capturing if the HotkeyPickerDialog is active.
+
     // get hotkey of the capture
     TInt captureHotkey(0);
     if (iGrabSettings.iCaptureMode == ECaptureModeSingleCapture)
@@ -514,7 +582,9 @@ TBool CScreenGrabberModel::HandleCaptureCommandsL(const TWsEvent& aEvent)
             ||
               ( captureHotkey == EHotkeyPOC &&
                 aEvent.Type()==EEventKeyDown && aEvent.Key()->iScanCode==EStdKeyApplication1A )
-            )
+	    ||
+              ( captureHotkey == ECustomHotkey &&
+                aEvent.Type()==EEventKeyDown && aEvent.Key()->iScanCode==iGrabSettings.iCustomCaptureHotkey ) )
 		{
 		
 		// check if already capturing images in sequence
@@ -660,33 +730,17 @@ void CScreenGrabberModel::TakeScreenShotAndSaveL()
         PlayBeepSound();
 
 
-    // get memory in use & image format of the screen capture
-#ifdef SCREENGRABBER_MULTIDRIVE_SUPPORT            
-    TDriveNumber memoryInUse(EDriveC);
-#else
-    TInt memoryInUse(0);
-#endif
     TInt imageFormat(0);
     TFileName fileName;
     
     if (iGrabSettings.iCaptureMode == ECaptureModeSingleCapture)
         {
-#ifdef SCREENGRABBER_MULTIDRIVE_SUPPORT            
-        memoryInUse = iGrabSettings.iSingleCaptureMemoryInUseMultiDrive;
-#else
-        memoryInUse = iGrabSettings.iSingleCaptureMemoryInUse;
-#endif
+
         imageFormat = iGrabSettings.iSingleCaptureImageFormat;
         fileName = iGrabSettings.iSingleCaptureFileName;
         }
     else if (iGrabSettings.iCaptureMode == ECaptureModeSequantialCapture)
         {
-#ifdef SCREENGRABBER_MULTIDRIVE_SUPPORT            
-        memoryInUse = iGrabSettings.iSequantialCaptureMemoryInUseMultiDrive;
-#else
-        memoryInUse = iGrabSettings.iSequantialCaptureMemoryInUse;
-#endif
-
         imageFormat = iGrabSettings.iSequantialCaptureImageFormat;
         fileName = iGrabSettings.iSequantialCaptureFileName;
         }
@@ -695,20 +749,17 @@ void CScreenGrabberModel::TakeScreenShotAndSaveL()
 
 
     // init the path for saving the file
-#ifdef SCREENGRABBER_MULTIDRIVE_SUPPORT
-    if (PathInfo::GetRootPath(iSaveFileName, memoryInUse) != KErrNone || !DriveOK(memoryInUse))
-        iSaveFileName.Copy( PathInfo::PhoneMemoryRootPath() );
-#else
-    if (memoryInUse == CAknMemorySelectionSettingPage::EPhoneMemory || !MemoryCardOK())
-        iSaveFileName.Copy( PathInfo::PhoneMemoryRootPath() );
-    else
-        iSaveFileName.Copy( PathInfo::MemoryCardRootPath() );
-#endif
+    // check if drive isOK
+    if (!SavePathOK()){
+	iGrabSettings.iSavePath.Copy(PathInfo::PhoneMemoryRootPath());
 
-    iSaveFileName.Append( PathInfo::ImagesPath() );
-    iSaveFileName.Append( KScreenShotsSubDirectory );
+	iGrabSettings.iSavePath.Append(PathInfo::ImagesPath());
     
-    
+	iGrabSettings.iSavePath.Append(KScreenShotsSubDirectory);
+    }
+
+    iSaveFileName.Copy(iGrabSettings.iSavePath);
+     
     // a quick check that filename is valid
     if (fileName.Length() > 0 && fileName.Length() <= 255) 
         iSaveFileName.Append( fileName );
@@ -792,7 +843,16 @@ void CScreenGrabberModel::TakeScreenShotAndSaveL()
             iImageEncoder->Convert( &iStatus, *iPreviouslyCapturedBitmap );
             }
             break;
-            
+        case EImageFormatGIFHQ:
+            {
+            // set filename
+            iSaveFileName.Append(_L("gif"));
+            CApaApplication::GenerateFileName(iEnv->FsSession(), iSaveFileName );  // unique filename
+
+
+	    SaveAsGIFHQ(iStatus, iEnv->FsSession(), iSaveFileName, iPreviouslyCapturedBitmap);
+	    }
+	    break;
         case EImageFormatMBM:
             {
             // set filename
@@ -820,13 +880,251 @@ void CScreenGrabberModel::TakeScreenShotAndSaveL()
     
 // ---------------------------------------------------------------------------
 
-void CScreenGrabberModel::CaptureFrameForVideoL()
-    {
-    // record time
-    TTime timeNow;
-    timeNow.HomeTime();
+
+void CScreenGrabberModel::CaptureFrameForVideoHQL()
+{
+	// record time
     
-    // take a screen shot	
+	TTime timeNow;
+	timeNow.HomeTime();
+    
+	// take a screen shot	
+ 	CFbsBitmap* currentCapturedBitmap = new(ELeave) CFbsBitmap;
+ 	CleanupStack::PushL(currentCapturedBitmap);
+
+	CWsScreenDevice* screenDevice = new(ELeave) CWsScreenDevice( CEikonEnv::Static()->WsSession() );
+	CleanupStack::PushL( screenDevice );
+	TInt screenDeviceNumber = iEnv->WsSession().GetFocusScreen();
+	if (iSecondScreenAvailable && iGrabSettings.iScreenDevice != screenDeviceNumber)
+	{
+	    screenDeviceNumber = iGrabSettings.iScreenDevice;
+	}
+
+	User::LeaveIfError( screenDevice->Construct(screenDeviceNumber) );
+
+	TDisplayMode displayMode = screenDevice->DisplayMode(); 
+	TSize currentScreenSize = screenDevice->SizeInPixels();
+
+	User::LeaveIfError( currentCapturedBitmap->Create(currentScreenSize, displayMode) );
+	User::LeaveIfError( screenDevice->CopyScreenToBitmap(currentCapturedBitmap) );
+	CleanupStack::PopAndDestroy(); // screenDevice
+
+	// grow video's dimensions if the size has changed
+	if (currentScreenSize.iWidth > iVideoDimensions.iWidth)
+	    {
+	    iVideoDimensions.iWidth = currentScreenSize.iWidth;
+	    }
+	if (currentScreenSize.iHeight > iVideoDimensions.iHeight)
+	    {
+	    iVideoDimensions.iHeight = currentScreenSize.iHeight;
+	    }
+
+    TInt64 currentDelay(0);
+ 
+    // play a beep sound every 30th frame
+    if (iCurrentFrameNumber%30 == 0)
+        PlayBeepSound();
+
+    // create a new frame
+    TVideoFrame frame;
+    frame.iDelay = 500; // use default delay 5.00 secs
+    
+    // get info of the RAM drive
+    TDriveNumber ramDrive = EDriveD;
+    TVolumeInfo ramDriveInfo;
+    iEnv->FsSession().Volume(ramDriveInfo, ramDrive);
+    
+    // init the directory for saving the file, preferably use ram drive if there is enough disk space, otherwise use always C drive
+    TFileName tempDirectory;
+    TFileName sessionPath;
+    
+    if (ramDriveInfo.iFree > (iVideoDimensions.iWidth*iVideoDimensions.iHeight+50000))
+        sessionPath.Copy( _L("D:") );
+    else
+        sessionPath.Copy( _L("C:") );
+    
+    sessionPath.Append(KSGTemporaryDirectory);
+    tempDirectory.Copy(KSGTemporaryDirectory);
+    
+    iEnv->FsSession().MkDirAll(sessionPath);
+    iEnv->FsSession().SetSessionPath(sessionPath);
+
+    // create a temp file, path to the bitmap is saved automatically to frame.iFileStorePath
+    RFile file;
+    User::LeaveIfError( file.Temp(iEnv->FsSession(), tempDirectory, frame.iFileStorePath, EFileWrite) );
+    RFileWriteStream writeStream(file);
+    
+    TBool ignoreFrame(EFalse);
+    
+    frame.iWidth = currentScreenSize.iWidth;    
+    frame.iHeight = currentScreenSize.iHeight;  
+    //frame.iXPos = 0;
+    //frame.iYPos = 0;
+    //frame.iEnableTransparency = EFalse;
+    // x,y  are not used and not supported by msf_gif
+    frame.iFillsWholeScreen = ETrue;
+ 
+    // check if is this the first frame
+    if (iCurrentFrameNumber == 0)
+        {
+        // first frame,  no comparison needed
+       
+        currentCapturedBitmap->ExternalizeL(writeStream);  
+
+        }
+    
+    else
+        {
+        // next frame is a difference between the previous one
+        currentDelay = timeNow.MicroSecondsFrom(iPreviousFrameTaken).Int64();
+        
+        // get reference to previos frame
+        TVideoFrame& prevFrame = iVideoFrameArray->At(iVideoFrameArray->Count()-1);
+        
+        
+        // check if video dimensions have changed
+        if (currentScreenSize.iWidth != iPreviousFrameScreenDimension.iWidth
+            || currentScreenSize.iHeight != iPreviousFrameScreenDimension.iHeight)
+            {
+		// not supported by msf_gif
+		User::Leave(KErrArgument);
+            }
+
+        else
+            {
+
+
+	    TInt bpp = TDisplayModeUtils::NumDisplayModeBitsPerPixel(displayMode);
+
+            // compare the bitmaps
+            HBufC8* curImgScanLineBuf = HBufC8::NewLC(currentScreenSize.iWidth*bpp);
+            TPtr8 curImgScanLinePtr = curImgScanLineBuf->Des();
+            HBufC8* prevImgScanLineBuf = HBufC8::NewLC(currentScreenSize.iWidth*bpp);
+            TPtr8 prevImgScanLinePtr = prevImgScanLineBuf->Des();
+            
+            TPoint pt(0,0);
+            TBool differenceFound(EFalse);
+        
+            // scan the image from top to bottom
+            for (TInt i=0; i<currentScreenSize.iHeight; i++)
+	    {
+		pt.iY = i;              
+                currentCapturedBitmap->GetScanLine(curImgScanLinePtr, pt, currentScreenSize.iWidth, displayMode);
+
+		iPreviouslyCapturedBitmap->GetScanLine(prevImgScanLinePtr, pt, currentScreenSize.iWidth, displayMode);
+                
+                if (curImgScanLinePtr != prevImgScanLinePtr)
+		{
+                    differenceFound = ETrue;
+                    break;    
+                }
+
+            }
+                
+            if (differenceFound)
+                {
+		
+		currentCapturedBitmap->ExternalizeL(writeStream);
+  
+                // update the previous frame to contain the new delay value
+                prevFrame.iDelay = TUint( (double) currentDelay / 10000 );
+                }
+
+            else
+                {
+                // frames are identical, we can just ignore this one
+                ignoreFrame = ETrue;     
+                }
+            
+            CleanupStack::PopAndDestroy(2); //curImgScanLineBuf,prevImgScanLineBuf
+
+            } 
+        } 
+
+    // close the stream
+    writeStream.CommitL();
+    writeStream.Close();
+    file.Close();
+    
+
+    if (ignoreFrame)
+        {
+        // delete the temp file since we don't need that
+        iEnv->FsSession().Delete(frame.iFileStorePath);
+        }
+    else
+        {
+        // remember for the next frame when this frame was taken
+        iPreviousFrameTaken = timeNow;
+
+        // take a copy of currentCapturedBitmap to iPreviouslyCapturedBitmap
+        User::LeaveIfError( iPreviouslyCapturedBitmap->Create(iVideoDimensions, displayMode) );
+
+        TPoint pt(0,0);
+        HBufC8* tempScanLineBuf = HBufC8::NewMaxLC(iVideoDimensions.iWidth);
+        TPtr8 tempScanLinePtr = tempScanLineBuf->Des();
+        
+        for (TInt i=0; i<iVideoDimensions.iHeight; i++)
+            {
+            pt.iY = i;
+            currentCapturedBitmap->GetScanLine(tempScanLinePtr, pt, iVideoDimensions.iWidth, displayMode);
+            iPreviouslyCapturedBitmap->SetScanLine(tempScanLinePtr, i);
+            }
+            
+        CleanupStack::PopAndDestroy(); //tempScanLineBuf
+        
+        // append frame information to the array
+        iVideoFrameArray->AppendL(frame);
+        
+        // remember screen size
+        iPreviousFrameScreenDimension = currentScreenSize;
+        }    
+
+    
+    CleanupStack::PopAndDestroy(); //currentCapturedBitmap
+    
+
+    // set the state of the active object
+    iState = ENextVideoFrame;
+	
+    // check time spent on the work above (probably this is not so important)
+    TTime timeNow2;
+    timeNow2.HomeTime();
+    TInt64 handlingDelay = timeNow2.MicroSecondsFrom(timeNow).Int64();
+    
+	// calculate delay till next frame
+    TUint idealDelay = VIDEO_CAPTURE_DELAY*1000;
+    TInt usedDelay; 
+    if (currentDelay > idealDelay) usedDelay = idealDelay - (currentDelay - idealDelay) - handlingDelay;
+
+    else usedDelay = idealDelay - handlingDelay;
+	
+    // check that the delay is atleast minimum delay anyway
+    if (usedDelay < VIDEO_CAPTURE_MINIMUM_DELAY*1000) usedDelay = VIDEO_CAPTURE_MINIMUM_DELAY*1000;
+	
+    
+    iTimer.After(iStatus, usedDelay);
+    // indicate an outstanding request
+    SetActive();
+}
+    
+
+
+void CScreenGrabberModel::CaptureFrameForVideoL()
+    { 
+
+
+	if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIFHQ)
+	{
+	    CaptureFrameForVideoHQL();
+	    return;
+	}
+
+	// record time  
+	TTime timeNow; 
+	timeNow.HomeTime();
+
+	// take a screen shot	
  	CFbsBitmap* currentCapturedBitmap = new(ELeave) CFbsBitmap;
  	CleanupStack::PushL(currentCapturedBitmap);
 
@@ -993,10 +1291,13 @@ void CScreenGrabberModel::CaptureFrameForVideoL()
                       
                 // get also the x-coordinates by scanning vertical scan lines
                 HBufC8* curImgVerticalScanLineBuf = HBufC8::NewLC(currentScreenSize.iHeight*3);
-                TPtr8 curImgVerticalScanLinePtr = curImgScanLineBuf->Des();
+                //TPtr8 curImgVerticalScanLinePtr = curImgScanLineBuf->Des();
+                TPtr8 curImgVerticalScanLinePtr = curImgVerticalScanLineBuf->Des();
+
                 HBufC8* prevImgVerticalScanLineBuf = HBufC8::NewLC(currentScreenSize.iHeight*3);
-                TPtr8 prevImgVerticalScanLinePtr = prevImgScanLineBuf->Des();
-                        
+                //TPtr8 prevImgVerticalScanLinePtr = prevImgScanLineBuf->Des();
+                 TPtr8 prevImgVerticalScanLinePtr = prevImgVerticalScanLineBuf->Des();
+                                 
                 // first scan by from left to right
                 for (TInt i=0; i<currentScreenSize.iWidth; i++)
                     {
@@ -1178,13 +1479,14 @@ void CScreenGrabberModel::CaptureFrameForVideoL()
     // indicate an outstanding request
     SetActive();
     }
-    
+   
 // ---------------------------------------------------------------------------
     
 void CScreenGrabberModel::RunL()
     {
 	switch (iState) 
 		{
+
         // encoding of the image is now finished
 		case EEncodingImage: 
 			{
@@ -1253,8 +1555,9 @@ void CScreenGrabberModel::RunL()
             // check if we can take more frames or just finish
             if (!iStopCapturing && iStatus.Int()==KErrNone)
                 {
-                // take next frame
-                CaptureFrameForVideoL();
+              
+		    // take next frame 
+		    CaptureFrameForVideoL();
                 }
             else
                 {
@@ -1300,39 +1603,49 @@ void CScreenGrabberModel::SaveVideoL(TInt aErr)
     if (aErr)
         CapturingFinishedL(aErr);   
    
-    else if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIF)
+    else if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIF || iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIFHQ)
         {
         TInt err(KErrNone);
         
         // init the path for saving the file
-
-#ifdef SCREENGRABBER_MULTIDRIVE_SUPPORT
-        if (PathInfo::GetRootPath(iSaveFileName, iGrabSettings.iVideoCaptureMemoryInUseMultiDrive) != KErrNone || !DriveOK(iGrabSettings.iVideoCaptureMemoryInUseMultiDrive))
-            iSaveFileName.Copy( PathInfo::PhoneMemoryRootPath() );
-#else
-        if (iGrabSettings.iVideoCaptureMemoryInUse == CAknMemorySelectionSettingPage::EPhoneMemory || !MemoryCardOK())
-            iSaveFileName.Copy( PathInfo::PhoneMemoryRootPath() );
-        else
-            iSaveFileName.Copy( PathInfo::MemoryCardRootPath() );
-#endif
-
-        iSaveFileName.Append( PathInfo::ImagesPath() );     // animated gif is actually an image, not a video
-        iSaveFileName.Append( KScreenShotsSubDirectory );
- 
+	    
+	if (!SavePathOK()){
+	
+	    iGrabSettings.iSavePath.Copy(PathInfo::PhoneMemoryRootPath());	
+	    iGrabSettings.iSavePath.Append(PathInfo::ImagesPath());	
+	    iGrabSettings.iSavePath.Append(KScreenShotsSubDirectory);
     
+	}
+
+	iSaveFileName.Copy(iGrabSettings.iSavePath);
+  
         // a quick check that filename is valid
         if (iGrabSettings.iVideoCaptureFileName.Length() > 0 && iGrabSettings.iVideoCaptureFileName.Length() <= 255) 
             iSaveFileName.Append( iGrabSettings.iVideoCaptureFileName );
         else
             iSaveFileName.Append( KDefaultVideoFileName );
 
-        iSaveFileName.Append( _L(".gif") );
-
-        CApaApplication::GenerateFileName(iEnv->FsSession(), iSaveFileName );  // unique filename
-
         // create and save the gif animation
-        err = CGifAnimator::CreateGifAnimation(iSaveFileName, iVideoDimensions, iVideoFrameArray);
+	if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIFHQ)
+	{
         
+	    iSaveFileName.Append( _L("_HQ.gif") );
+       
+	    CApaApplication::GenerateFileName(iEnv->FsSession(), iSaveFileName );  // unique filename
+
+	    err = CGifHQAnimator::CreateGifAnimation(iSaveFileName, iVideoDimensions, iVideoFrameArray);
+ 
+	}
+	else{
+
+	    iSaveFileName.Append( _L(".gif") );
+     
+	    CApaApplication::GenerateFileName(iEnv->FsSession(), iSaveFileName );  // unique filename
+
+	    err = CGifAnimator::CreateGifAnimation(iSaveFileName, iVideoDimensions, iVideoFrameArray);
+	}
+
+ 
         // remove the saved file in case of errors since it's likely corrupted
         if (err != KErrNone)
             iEnv->FsSession().Delete(iSaveFileName);
@@ -1374,42 +1687,45 @@ void CScreenGrabberModel::CapturingFinishedL(TInt aErr)
     // display a global query to show the results
 
     if (aErr == KErrNone)
-        {
+    {
+	HBufC* note = NULL;
         switch (iGrabSettings.iCaptureMode)
             {
             case ECaptureModeSingleCapture:
-                {
-                iSavedQuery->DisplayL(KSingleShotSaved);
-                }
+		note = StringLoader::LoadL(R_SAVED_QUERY_PROMPT1, iEnv);
                 break;
             
             case ECaptureModeSequantialCapture:
                 {
                 if (iNumberOfTakenShots == 1)
-                    iSavedQuery->DisplayL(KSingleShotSaved);
+                    note = StringLoader::LoadL(R_SAVED_QUERY_PROMPT1, iEnv);
+
                 else
                     {
-                    TBuf<256> note;
-                    note.Format(KMultipleShotsSaved, iNumberOfTakenShots);
-                    iSavedQuery->DisplayL(note);
+
+			note = StringLoader::LoadL(R_SAVED_QUERY_PROMPT2, iNumberOfTakenShots, iEnv);
+                    
                     }
                 }
                 break;            
     
             case ECaptureModeVideoCapture:
-                {
-                iSavedQuery->DisplayL(KVideoSaved);
-                }
+                note = StringLoader::LoadL(R_SAVED_QUERY_PROMPT3, iEnv);
                 break;             
     
             default:
                 User::Panic(_L("Inv.capt.mode"), 51);
                 break;
             }            
-       
+        
+	if (note){
+	    CleanupStack::PushL(note);
+	    iSavedQuery->DisplayL(*note); 
+	    CleanupStack::PopAndDestroy(note);
+	}
         // notify the new file to Media Gallery
         UpdateFileToGallery(iSaveFileName);
-        }
+    }
     else
         {
         TBuf<256> errorNote;
@@ -1420,7 +1736,7 @@ void CScreenGrabberModel::CapturingFinishedL(TInt aErr)
         CleanupStack::PopAndDestroy();  //textResolver    
           
         iSavedQuery->DisplayL(errorNote, ETrue);
-        }
+	}
 
     // reset values
     iNumberOfTakenShots = 0;
@@ -1436,11 +1752,37 @@ void CScreenGrabberModel::CapturingFinishedL(TInt aErr)
     }
     
 // ---------------------------------------------------------------------------
-
+/*
 TBool CScreenGrabberModel::MemoryCardOK()
 	{
 	return DriveOK(EDriveE); // hardcoding EDriveE here maybe is not so good idea..   
 	}
+*/
+
+
+TBool CScreenGrabberModel::SavePathOK()
+{
+
+    TBool rootOK(EFalse);
+    TPtrC root = iGrabSettings.iSavePath.Left(3);
+
+    if (BaflUtils::PathExists(iEnv->FsSession(), root))
+    {
+	TBool isRO(EFalse); 
+	if (BaflUtils::DiskIsReadOnly(iEnv->FsSession(), root, isRO) == KErrNone)
+	{
+	    rootOK = !isRO;	
+	}   
+    }
+
+    return rootOK;
+
+    /*TChar d = iGrabSettings.iSavePath[0]
+    d.UpperCase();
+    if (d == 'E') return DriveOK(EDriveE);
+    else if (d == 'F') return DriveOK(EDriveF);
+    return ETrue;*/
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1549,6 +1891,7 @@ TInt CScreenGrabberModel::UpdateFileToGallery(const TDesC& aFullPath)
     }
 
 #include <hal.h>
+
 void CScreenGrabberModel::CheckSecondScreen()
 {
     iSecondScreenAvailable = EFalse;

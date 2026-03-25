@@ -27,9 +27,9 @@
 #include <AknGlobalProgressDialog.h>
 #include <AknQueryDialog.h> 
 #include <avkon.rsg>
+#include <ScreenGrabber2.rsg>
 
-_LIT(KSavingText, "Saving");
-    
+  
 // ---------------------------------------------------------------------------
 
 TInt CGifAnimator::CreateGifAnimation(const TDesC& aFileName, TSize aDimensions, CVideoFrameArray* aVideoFrameArray)
@@ -60,7 +60,7 @@ void CGifAnimator::StartL(const TDesC& aFileName, const TSize& aDimensions, CVid
     
     // show a progress dialog
     iSavingProgressDialog = CSavingProgressDialog::NewL(this);
-    iSavingProgressDialog->StartDisplayingL(KSavingText, aVideoFrameArray->Count()-1);
+    iSavingProgressDialog->StartDisplayingL(aVideoFrameArray->Count()-1);
 
     // open the file for writing
     User::LeaveIfError(iFs.Connect());
@@ -365,6 +365,7 @@ CSavingProgressDialog::~CSavingProgressDialog()
     delete iGlobalProgressDialog;
     }
 
+
 void CSavingProgressDialog::StartDisplayingL(const TDesC &aText, TInt aFinalValue)
     {
     if (!iVisible)
@@ -379,6 +380,13 @@ void CSavingProgressDialog::StartDisplayingL(const TDesC &aText, TInt aFinalValu
         SetActive();
         }
     }
+
+void CSavingProgressDialog::StartDisplayingL(TInt aFinalValue)
+{
+    HBufC* saving = CCoeEnv::Static()->AllocReadResourceLC(R_SAVING_DIALOG_PROMPT);   
+    StartDisplayingL(*saving, aFinalValue);
+    CleanupStack::PopAndDestroy(saving);
+} 
 
 void CSavingProgressDialog::DoCancel()
     {

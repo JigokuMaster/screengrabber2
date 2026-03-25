@@ -75,6 +75,7 @@ public:
     static CSavingProgressDialog* NewL(MDialogCallback* aDialogCallback);
     ~CSavingProgressDialog();
     void StartDisplayingL(const TDesC &aText, TInt aFinalValue);
+    void StartDisplayingL(TInt aFinalValue);
     void IncreaseProgressValueWithOne();
     void ProcessFinished();
 

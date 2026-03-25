@@ -1,19 +1,19 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:  
-*
-*/
+ * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:  
+ *
+ */
 
 
 
@@ -36,26 +36,21 @@
 
 // setting keys (do not change uids of existing keys to maintain compatibility to older versions!)
 const TUid KSGSettingCaptureMode                            = { 0x00 };
-
 const TUid KSGSettingSingleCaptureHotkey                    = { 0x01 };
 const TUid KSGSettingSingleCaptureImageFormat               = { 0x02 };
-const TUid KSGSettingSingleCaptureMemoryInUse               = { 0x03 };
-const TUid KSGSettingSingleCaptureMemoryInUseMultiDrive     = { 0x04 };
-const TUid KSGSettingSingleCaptureFileName                  = { 0x05 };
-
-const TUid KSGSettingSequantialCaptureHotkey                = { 0x06 };
-const TUid KSGSettingSequantialCaptureImageFormat           = { 0x07 };
-const TUid KSGSettingSequantialCaptureDelay                 = { 0x08 };
-const TUid KSGSettingSequantialCaptureMemoryInUse           = { 0x09 };
-const TUid KSGSettingSequantialCaptureMemoryInUseMultiDrive = { 0x0A };
-const TUid KSGSettingSequantialCaptureFileName              = { 0x0B };
-
-const TUid KSGSettingVideoCaptureHotkey                     = { 0x0C };
-const TUid KSGSettingVideoCaptureVideoFormat                = { 0x0D };
-const TUid KSGSettingVideoCaptureMemoryInUse                = { 0x0E };
-const TUid KSGSettingVideoCaptureMemoryInUseMultiDrive      = { 0x0F };
-const TUid KSGSettingVideoCaptureFileName                   = { 0x10 };
-const TUid KSGSettingScreenDevice                           = { 0x11 };
+const TUid KSGSettingSingleCaptureFileName                  = { 0x03 };
+const TUid KSGSettingSequantialCaptureHotkey                = { 0x04 };
+const TUid KSGSettingSequantialCaptureImageFormat           = { 0x05 };
+const TUid KSGSettingSequantialCaptureDelay                 = { 0x06 };
+const TUid KSGSettingSequantialCaptureMemoryInUse           = { 0x07 };
+const TUid KSGSettingSequantialCaptureFileName              = { 0x08 };
+const TUid KSGSettingVideoCaptureHotkey                     = { 0x09 };
+const TUid KSGSettingVideoCaptureVideoFormat                = { 0x0A };
+const TUid KSGSettingVideoCaptureFileName                   = { 0x0B };
+const TUid KSGSettingScreenDevice                           = { 0x0C };
+const TUid KSGSettingCustomCaptureHotkey                    = { 0x0D };
+const TUid KSGSettingSavePath 
+          = { 0x0F };
 
 
 class CImageEncoder;
@@ -68,97 +63,104 @@ class CMGXFileManager;
 class CMGXFileNotificationHandler;
 
 class TGrabSettings
-    {
+{
+
 public:
-    TInt                                        iCaptureMode;
-    
-    TInt                                        iSingleCaptureHotkey;
-    TInt                                        iSingleCaptureImageFormat;
-    CAknMemorySelectionSettingPage::TMemory     iSingleCaptureMemoryInUse; 
-    TDriveNumber                                iSingleCaptureMemoryInUseMultiDrive;
-    TFileName                                   iSingleCaptureFileName;
+    TInt	iCaptureMode;
+    TInt	iSingleCaptureHotkey;
+    TInt        iSingleCaptureImageFormat;
+    TFileName	iSingleCaptureFileName;
 
-    TInt                                        iSequantialCaptureHotkey;
-    TInt                                        iSequantialCaptureImageFormat;
-    TInt                                        iSequantialCaptureDelay;
-    CAknMemorySelectionSettingPage::TMemory     iSequantialCaptureMemoryInUse; 
-    TDriveNumber                                iSequantialCaptureMemoryInUseMultiDrive;
-    TFileName                                   iSequantialCaptureFileName;
+    TInt	iSequantialCaptureHotkey;
+    TInt	iSequantialCaptureImageFormat;
+    TInt	iSequantialCaptureDelay;
+       
+    TFileName	iSequantialCaptureFileName;
 
-    TInt                                        iVideoCaptureHotkey;
-    TInt                                        iVideoCaptureVideoFormat;
-    CAknMemorySelectionSettingPage::TMemory     iVideoCaptureMemoryInUse; 
-    TDriveNumber                                iVideoCaptureMemoryInUseMultiDrive;
-    TFileName                                   iVideoCaptureFileName;
-    TInt					iScreenDevice;
-    };
+    TInt	iVideoCaptureHotkey;
+    TInt	iVideoCaptureVideoFormat;
+    TFileName	iVideoCaptureFileName;
+    TInt	iScreenDevice;
+    TUint	iCustomCaptureHotkey;
+    TFileName	iSavePath;
+
+};
 
 
 class TVideoFrame
-    {
-public:
-    TUint       iWidth;
-    TUint       iHeight;
-    TUint       iXPos;
-    TUint       iYPos;
-    TUint       iDelay; // 100 = 1 sec
-    TBool       iEnableTransparency;
-    TBool       iFillsWholeScreen;
-    TFileName   iFileStorePath;
-    };
+{
+    public:
+	TUint       iWidth;
+	TUint       iHeight;
+	TUint       iXPos;
+	TUint       iYPos;
+	TUint       iDelay; // 100 = 1 sec
+	TBool       iEnableTransparency;
+	TBool       iFillsWholeScreen;
+	TFileName   iFileStorePath;
+};
 
 
 typedef CArrayFixSeg<TVideoFrame> CVideoFrameArray;
 
 
 class CScreenGrabberModel : public CActive, public MMdaAudioToneObserver
-	{
-	// active object states
-	enum TState 
-		{
-		EIdle = 0,              // do nothing
-		EEncodingImage,         // ICL encoding of an image
-		ESequenceDelay,         // waiting till next capture
-		ECancelCapturing,       // asking to cancel capturing
-		ENextVideoFrame,        // get next frame for video
-		ECancelVideoCapturing,  // asking to cancel video capturing  
-		EQueryDelay             // waiting till to remove query
-		};
+{
+    // active object states
+    enum TState 
+    {
+	EIdle = 0,              // do nothing
+	EEncodingImage,         // ICL encoding of an image
+	ESequenceDelay,         // waiting till next capture
+	ECancelCapturing,       // asking to cancel capturing
+	ENextVideoFrame,        // get next frame for video
+	ECancelVideoCapturing,  // asking to cancel video capturing  
+	EQueryDelay             // waiting till to remove query
+    };
 
 public:
-	static CScreenGrabberModel* NewL();
-	~CScreenGrabberModel();
-	void ActivateModelL();
-	void DeActivateModelL();
+    static CScreenGrabberModel* NewL();
+    ~CScreenGrabberModel();
+    void ActivateModelL();
+    void DeActivateModelL();
 
 private:
-	CScreenGrabberModel();
-	void ConstructL();
+    CScreenGrabberModel();
+    void ConstructL();
 
-	void RunL();
-	void DoCancel();
+    void RunL();
+    void DoCancel();
 
     void LoadSettingsL();
     void TakeScreenShotAndSaveL();
+    void CaptureFrameForVideoHQL();
     void CaptureFrameForVideoL();
     void SaveVideoL(TInt aErr);
     void CapturingFinishedL(TInt aErr);
     void CleanTemporaryFilesL();
-    TBool MemoryCardOK();
+    //TBool MemoryCardOK();
+    TBool SavePathOK();
     TBool DriveOK(TDriveNumber aNumber);
     void PlayBeepSound();
+    void LoadDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, TUint& aValue);
     void LoadDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, TInt& aValue);
     void LoadDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, TDes& aValue);
+    void SaveDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, const TUint& aValue);  
     void SaveDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, const TInt& aValue);
     void SaveDFSValueL(CDictionaryFileStore* aDicFS, const TUid& aUid, const TDes& aValue);
-    TInt UpdateFileToGallery(const TDesC& aFullPath);
+    TInt UpdateFileToGallery(const TDesC& aFullPath);    
     void CheckSecondScreen();
 
 public:
     inline TGrabSettings GrabSettings() { return iGrabSettings; }
     void SaveSettingsL(TGrabSettings aGrabSettings);
+    void CaptureAllKeys();
+    
+    void CancelCaptureAllKeys();
+
     void ActivateCaptureKeysL(TBool aChangeKey=EFalse);
-    void CancelCapturing();
+    void StopCapturing();
+    void CancelCapturing();   
     TBool HandleCaptureCommandsL(const TWsEvent& aEvent);
     void MatoPrepareComplete(TInt aError);
     void MatoPlayComplete(TInt aError);
@@ -168,18 +170,18 @@ private:
     CMdaAudioToneUtility*   iMdaAudioToneUtility;       // a tone player
     TGrabSettings           iGrabSettings;              // a simple class to store the settings used in the screen capture
     CEikonEnv*              iEnv;                       // pointer to our eikon environment
-	RWindowGroup            iRootWin;                   // application's window group
-	TInt                    iCapturedKey;               // a handle to the key which is captured
-	TInt                    iCapturedKeyUnD;            // a handle to the key which is captured, up and down
-	TInt                    iCapturedKeyHash;           // a handle to the hash key which is captured
-	TInt                    iCapturedKeyHashUnD;        // a handle to the hash key which is captured, up and down
-	CImageEncoder*          iImageEncoder;              // engine from ICL to do the image conversion
+    RWindowGroup            iRootWin;                   // application's window group
+    TInt                    iCapturedKey;               // a handle to the key which is captured
+    TInt                    iCapturedKeyUnD;            // a handle to the key which is captured, up and down
+    TInt                    iCapturedKeyHash;           // a handle to the hash key which is captured
+    TInt                    iCapturedKeyHashUnD;        // a handle to the hash key which is captured, up and down
+    CImageEncoder*          iImageEncoder;              // engine from ICL to do the image conversion
     CFbsBitmap*             iPreviouslyCapturedBitmap;  // a previously captured bitmap
-	TState                  iState;                     // state of this active object
+    TState                  iState;                     // state of this active object
     TFileName               iSaveFileName;              // target filename of the taken screen shot
     CFrameImageData*        iFrameImageData;            // frame and image block data needed by ICL
     CSavedQuery*            iSavedQuery;                // a class to display global queries
-	RTimer                  iTimer;                     // a timer for async delays
+    RTimer                  iTimer;                     // a timer for async delays
     TBool 				    iCapturingInProgress;   	// boolean to check if capturing is in progress
     TBool                   iStopCapturing;             // boolean to specify if to ask capturing
     TUint                   iNumberOfTakenShots;        // a number of the taken screen shots in the sequantial mode
@@ -195,7 +197,7 @@ private:
     TBool                   iSecondScreenAvailable; 
     RLibrary                iGalleryUpdaterDLL;         // specifies pointer to Media Gallery File API DLL
     CMGXFileManager*        iMGXFileManager;            // Media Gallery FileManager instance
-    };
+};
 
 
 class CSavedQuery : public CActive

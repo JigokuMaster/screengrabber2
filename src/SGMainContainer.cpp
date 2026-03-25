@@ -30,6 +30,7 @@
 #include <akntitle.h>
 #include <eikspane.h>  
 #include <AknDef.h>
+#include <ScreenGrabber2.rsg>
 
 const TUint KLeftMargin = 2;
 const TUint KRightMargin = 2;
@@ -50,9 +51,10 @@ void CScreenGrabberMainContainer::ConstructL(const TRect& aRect)
     // set title of the app
     CEikStatusPane* statusPane = iEikonEnv->AppUiFactory()->StatusPane();
     CAknTitlePane* title = static_cast<CAknTitlePane*>( statusPane->ControlL( TUid::Uid( EEikStatusPaneUidTitle ) ) );
-    title->SetTextL( _L("Screen Grabber2") );
+    title->SetTextL( _L("Screen Grabber") );
 
-    iText = HBufC::NewL(200000);
+    //iText = HBufC::NewL(200000);    
+    iText = iCoeEnv->AllocReadResourceL(R_USAGE_TEXT); 
     iCurrentLine = 0;
     iLineCount = 0;
     iNumberOfLinesFitsScreen = 0;
@@ -68,7 +70,8 @@ void CScreenGrabberMainContainer::ConstructL(const TRect& aRect)
     SetRect(aRect);
     ActivateL(); 
 
-    PrintText(_L("Please use the settings screen to define the capture mode and any other related settings such capture hotkey and saving format. Using the PNG format for screen shots is recommended, since it is compressed but lossless. The captures can be managed with the Media Gallery application.\n\nYou may start taking screenshots or capturing video now. Please press the Applications key to go back to the Application menu or send this application to the background via the Options menu. To be able to take screenshots or capture video, this applications needs to stay running in the background.\n"));
+    //PrintText(_L(""));
+    UpdateVisualContentL(EFalse);  // do not automatically scroll to the bottom
     }
 
 CScreenGrabberMainContainer::~CScreenGrabberMainContainer()

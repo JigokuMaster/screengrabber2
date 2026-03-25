@@ -21,11 +21,11 @@
 #define SCREENGRABBER_HRH
 
 enum TScreenGrabberCommandIds
-    {
-	EScreenGrabberCmdSendToBackground = 1,
+{
+    EScreenGrabberCmdSendToBackground = 1,
     EScreenGrabberCmdSettings,
-	EScreenGrabberCmdAbout,
-	EScreenGrabberCmdScreenResolution,
+    EScreenGrabberCmdAbout,
+    EScreenGrabberCmdScreenResolution,
     EScreenGrabberCmdScreenResolutionItem1,
     EScreenGrabberCmdScreenResolutionItem2,
     EScreenGrabberCmdScreenResolutionItem3,
@@ -38,9 +38,9 @@ enum TScreenGrabberCommandIds
     EScreenGrabberCmdScreenResolutionItem10,
     EScreenGrabberCmdScreenResolutionItem11,
     EScreenGrabberCmdScreenResolutionItem12,
-	EScreenGrabberCmdSettingsChange,
-	EScreenGrabberCmdSettingsExit,
-	EScreenGrabberCmdSettingsBack,
+    EScreenGrabberCmdSettingsChange,
+    EScreenGrabberCmdSettingsExit,
+    EScreenGrabberCmdSettingsBack,
     EProgressNote
     };
 
@@ -48,22 +48,29 @@ enum TScreenGrabberSettingListIds
     {
 	ESettingListCaptureModeSelection = 0,
 	ESettingListScreenDeviceSelection,
-	ESettingListSingleCaptureHotkeySelection,
-    ESettingListSingleCaptureImageFormatSelection,
-	ESettingListSingleCaptureMemorySelection,
+	ESettingListSingleCaptureHotkeySelection,  
+	ESettingListSingleCaptureImageFormatSelection,
+	//ESettingListSingleCaptureMemorySelection,
 	ESettingListSingleCaptureFileNameSelection,
 
 	ESettingListSequantialCaptureHotkeySelection,
-    ESettingListSequantialCaptureImageFormatSelection,
-    ESettingListSequantialCaptureDelaySelection,
-	ESettingListSequantialCaptureMemorySelection,
+    
+	ESettingListSequantialCaptureImageFormatSelection,
+    
+    
+	ESettingListSequantialCaptureDelaySelection,
+	//ESettingListSequantialCaptureMemorySelection,
 	ESettingListSequantialCaptureFileNameSelection,
 
 	ESettingListVideoCaptureHotkeySelection,
-    ESettingListVideoCaptureVideoFormatSelection,
-	ESettingListVideoCaptureMemorySelection,
-	ESettingListVideoCaptureFileNameSelection
-    };
+    
+	ESettingListVideoCaptureVideoFormatSelection,
+	
+	//ESettingListVideoCaptureMemorySelection,
+	ESettingListVideoCaptureFileNameSelection,
+	
+	ESettingListSavePathSelection
+};
 
 enum TScreenGrabberSettingCaptureModes
     {
@@ -77,27 +84,30 @@ enum TScreenGrabberSettingHotkeys
 	EHotkeySendKey = 0,
 	EHotkeyShiftStar,
 	EHotkeyHashStar,
-    EHotkeyShiftMenu,
+	EHotkeyShiftMenu,
 	EHotkeyPowerKey,
 	EHotkeySideKey,
 	EHotkeyCameraKey1,
 	EHotkeyCameraKey2,
-	EHotkeyPOC
+	EHotkeyPOC,
+	ECustomHotkey
     };
 
 enum TScreenGrabberSettingImageFormats
     {
 	EImageFormatPNG = 0,
-    EImageFormatJPGHQ,
-    EImageFormatJPGLQ,
+	EImageFormatJPGHQ,
+	EImageFormatJPGLQ,
 	EImageFormatBMP,
 	EImageFormatGIF,
+	EImageFormatGIFHQ,
 	EImageFormatMBM
     };
 
 enum TScreenGrabberSettingVideoFormats
     {
-	EVideoFormatAnimatedGIF = 0
+	EVideoFormatAnimatedGIF = 0,
+	EVideoFormatAnimatedGIFHQ
     };
 
 #endif      // SCREENGRABBER_HRH
