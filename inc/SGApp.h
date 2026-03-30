@@ -39,11 +39,18 @@ class CScreenGrabberApp : public CAknApplication
     {
     
     public: // Functions from base classes
+    
+	TFileName ResourceFileName() const;
+
         /**
         * From CApaApplication, overridden to enable INI file support.
         * @return A pointer to the dictionary store
         */
-    CDictionaryStore* OpenIniFileLC(RFs& aFs) const;
+    
+	CDictionaryStore* OpenIniFileLC(RFs& aFs) const;
+
+	TBool ReadLanguageL(TFileName &aFileName) const;
+	TBool SaveLanguageL(const TLanguage aLanguage);
     private:
 
         /**
@@ -57,6 +64,9 @@ class CScreenGrabberApp : public CAknApplication
         * @return The value of KUidScreenGrabber.
         */
         TUid AppDllUid() const;
+    public:
+	// Data
+	mutable TUint32 iCurrentLanguage;
     };
 
 #endif

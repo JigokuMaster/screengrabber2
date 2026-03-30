@@ -39,6 +39,15 @@
  #include <UikonInternalPSKeys.h>
 #endif
 
+_LIT(KAboutText, "version 4.7.2 (2026) built by JigokuMaster.\n"
+	"based on version 4.2.0 - 14th May 2009. Copyright © 2009 Nokia Corporation and/or its subsidiary(-ies), "
+	"All rights reserved. Licensed under Eclipse Public License v1.0\n\n"
+	"Thanks to:\n" 
+	"• Symbuzzer  (Turkish translation)\n"
+	"• Lee Nguyen  (Vietnamese translation)\n" 
+	"• WunderWungiel (App icon)\n"
+	"• gtrxAC, Matthew, MaxBondarchenko (Feature suggestions)\n"
+	"• notnullnotvoid@github.com (msf_gif library)");
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -121,14 +130,17 @@ void CScreenGrabberMainView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aM
             
             // create new menu item
             CEikMenuPaneItem::SData menuItem;
-            menuItem.iFlags = 0;
+	    menuItem.iFlags = 0;
+	    //if (i == 0) menuItem.iFlags = EEikMenuItemRadioStart | EEikMenuItemSymbolOn;
+	    //else menuItem.iFlags = EEikMenuItemRadioEnd;
             menuItem.iText = menuText;
             menuItem.iCommandId = EScreenGrabberCmdScreenResolutionItem1 + state;
             menuItem.iCascadeId = 0;
             aMenuPane->AddMenuItemL(menuItem);
+	    //aMenuPane->SetItemButtonState(EScreenGrabberCmdScreenResolutionItem1, EEikMenuItemSymbolOn);
             }
         }
-   
+	else AppUi()->DynInitMenuPaneL(aResourceId, aMenuPane);
     }
 
 #endif // SCREENGRABBER_SCREEN_RESOLUTION_CHANGE_SUPPORT
@@ -178,7 +190,7 @@ void CScreenGrabberMainView::HandleCommandL(TInt aCommand)
             err = RProperty::Set(KPSUidUikon, KUikLayoutState, state);
 
             screenDevice->SetScreenMode(screenMode);
-
+	    
             break;	    
             }
 #endif
@@ -192,7 +204,9 @@ void CScreenGrabberMainView::HandleCommandL(TInt aCommand)
         case EScreenGrabberCmdAbout:
             {
 	        CAknMessageQueryDialog* dialog = new (ELeave) CAknMessageQueryDialog;
-            dialog->ExecuteLD(R_SCREENGRABBER_ABOUT_DIALOG);
+		dialog->PrepareLC(R_SCREENGRABBER_ABOUT_DIALOG);
+		dialog->SetMessageTextL(KAboutText);
+		dialog->RunLD();
             }
             break;
         

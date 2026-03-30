@@ -17,7 +17,9 @@
 #elif defined LANGUAGE_01
 #include "ScreenGrabber2_01.rls"   // U.K. English
 #elif defined LANGUAGE_14
-#include "ScreenGrabber2_14.rls"   // Turkish by symbuzzer
+#include "ScreenGrabber2_14.rls"   // Turkish by Symbuzzer
+#elif defined LANGUAGE_96
+#include "ScreenGrabber2_96.rls"   // Vietnamese by Lee Nguyen 
 
 /*
 #elif defined LANGUAGE_09

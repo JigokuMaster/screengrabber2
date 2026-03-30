@@ -1,0 +1,166 @@
+/*
+============================================================================
+ Name		: ScreenGrabber2_01.rls
+
+ Author	  : JigokuMaster
+ Copyright   : Your copyright notice
+ Description : This is a localisation file for Squirrel
+				A .rls file is the one and only place where the logical
+				strings to be localised are defined. 
+============================================================================
+*/
+
+CHARACTER_SET UTF8
+
+//  LOCALISATION STRINGS
+
+// Caption string for app.
+rls_string qtn_caption_string "SG2"
+
+
+// strings for menu commands 
+rls_string STRING_r_sg_command1 "Chạy Nền"
+
+rls_string STRING_r_sg_command2 "Language"
+
+rls_string STRING_r_sg_command3 "Tỉ lệ màn hình"
+
+rls_string STRING_r_sg_command4 "Cài đặt"
+
+rls_string STRING_r_sg_command5 "Thông tin ứng dụng"
+
+rls_string STRING_r_sg_command6 "Thoát"
+
+// Language items
+rls_string STRING_r_sg_command2_item1 "English"
+rls_string STRING_r_sg_command2_item2 "Turkish"
+rls_string STRING_r_sg_command2_item3 "Vietnamese"
+
+// used in settings menu
+rls_string STRING_r_sg_command7 "Thay đổi"
+
+// strings for settings cba
+
+rls_string STRING_r_sg_cba1 "Tùy chọn"
+rls_string STRING_r_sg_cba2 "Quay lại"
+
+// strings for settings
+
+rls_string qtn_settings_caption_string "Cài đặt"
+
+rls_string STRING_r_sg_item1 "chế độ chụp"
+
+rls_string STRING_r_sg_item2 "thiết bị màn hình"
+
+rls_string STRING_r_sg_item3  "Phím tắt chụp"
+
+rls_string STRING_r_sg_item4  "Định dạng hình ảnh"
+
+rls_string STRING_r_sg_item5  "Tên tệp tin"
+
+rls_string STRING_r_sg_item6  "Phím tắt bắt đầu/dừng"
+
+rls_string STRING_r_sg_item7 "độ trễ (mili-giây)"
+
+rls_string STRING_r_sg_item8  "Định dạng video"
+
+rls_string STRING_r_sg_item9  "Nơi lưu"
+
+// strings for settings sub items (Capture mode)
+
+rls_string STRING_r_sg_arr1_item1  "Chụp đơn"
+
+rls_string STRING_r_sg_arr1_item2  "Chụp tuần tự"
+
+rls_string STRING_r_sg_arr1_item3  "Ghi hình"
+
+
+// strings for settings sub items (Screen device)
+
+rls_string STRING_r_sg_arr2_item1   "Màn hình chính"
+
+rls_string STRING_r_sg_arr2_item2  "Màn hình phụ"
+
+
+// strings for settings sub items (Hotkeys)
+
+rls_string STRING_r_sg_arr3_item1   "Phím gọi"
+
+rls_string STRING_r_sg_arr3_item2  "SHIFT + *"
+
+rls_string STRING_r_sg_arr3_item3  "HASH + *"
+
+rls_string STRING_r_sg_arr3_item4 "SHIFT + Menu"
+
+rls_string STRING_r_sg_arr3_item5 "Phím nguồn"
+
+rls_string STRING_r_sg_arr3_item6 "Phím cạnh (phím chức năng)"
+
+rls_string STRING_r_sg_arr3_item7 "Phím camera #1"
+
+rls_string STRING_r_sg_arr3_item8 "Phím camera #2"
+
+rls_string STRING_r_sg_arr3_item9 "POC"
+
+rls_string STRING_r_sg_arr3_item10 "Tùy chỉnh"
+
+// strings for settings sub items (Image format)
+
+rls_string STRING_r_sg_arr4_item1   "PNG"
+
+rls_string STRING_r_sg_arr4_item2   "JPEG chất lương cao."
+
+rls_string STRING_r_sg_arr4_item3   "JPEG chất lượng thấp."
+
+rls_string STRING_r_sg_arr4_item4   "BMP"
+
+rls_string STRING_r_sg_arr4_item5   "ảnh động (GIF)"
+
+rls_string STRING_r_sg_arr4_item6   "ảnh động chất lượng cao"
+
+rls_string STRING_r_sg_arr4_item7   "MBM"
+
+// strings for settings sub items (Video format)
+
+rls_string STRING_r_sg_arr5_item1   "Ảnh động (GIF)"
+
+rls_string STRING_r_sg_arr5_item2   "Ảnh động chất lượng cao"
+
+// strings for dialog (Custom key)
+
+rls_string STRING_r_dlg1_label  "Bấm phím gì đó:" 
+
+// strings for dialog (About)
+
+rls_string STRING_r_dlg2_label  "Thông tin về Scr.Grabber"
+
+// strings for (Save Path Selection Dialog)
+
+rls_string STRING_r_dlg3_label  "Chọn nơi lưu:"
+
+// strings for (Save Progress Dialog)
+
+rls_string STRING_r_dlg4_prompt "Đang lưu"
+
+// strings for (Exit Query)
+
+rls_string STRING_r_dlg5_prompt " thoát ứng dụng?"
+
+
+// string for (Save Confirmation Query)
+
+rls_string STRING_r_dlg6_prompt1 "Ảnh chụp màn hình đã được lưu vào thư viện"
+
+rls_string STRING_r_dlg6_prompt2 "%N Ảnh chụp màn hình đã được lưu vào thư viện"
+
+rls_string STRING_r_dlg6_prompt3 "Video đã được lưu vào thư viện"
+
+// strings for (restart query)
+
+rls_string STRING_r_dlg7_prompt "Restart required! exit now?"
+
+// usage text string 
+
+rls_string STRING_r_usage_msg "Vui lòng sử dụng màn hình cài đặt để xác định chế độ chụp và bất kỳ cài đặt liên quan nào khác như phím tắt chụp và định dạng lưu.Nên sử dụng định dạng PNG để chụp ảnh màn hình vì định dạng này được nén nhưng không làm giảm chất lượng. Bạn có thể quản lý các ảnh chụp bằng ứng dụng Thư viện phương tiện. Bạn có thể bắt đầu chụp ảnh màn hình hoặc ghi lại hình ảnh ngày bây giờ. Vui lòng nhấn phím Ứng dụng để quay lại menu hoặc đưa ứng dụng này vào chế độ nền thông qua Tuỳ chọn. Để có thể chụp ảnh màn hình hoặc quay video, ứng dụng này cần phải chạy ngầm trong nền. \n"
+
+// End of file

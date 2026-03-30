@@ -21,15 +21,23 @@ rls_string qtn_caption_string "SG2"
 // strings for menu commands 
 rls_string STRING_r_sg_command1 "Arka plana gönder"
 
-rls_string STRING_r_sg_command2 "Ekran çözünürlüğü"
+rls_string STRING_r_sg_command2 "Language"
 
-rls_string STRING_r_sg_command3 "Ayarlar"
+rls_string STRING_r_sg_command3 "Ekran çözünürlüğü"
 
-rls_string STRING_r_sg_command4 "Hakkında"
+rls_string STRING_r_sg_command4 "Ayarlar"
 
-rls_string STRING_r_sg_command5 "Çıkış"
+rls_string STRING_r_sg_command5 "Hakkında"
+
+rls_string STRING_r_sg_command6 "Çıkış"
+
+// Language items
+rls_string STRING_r_sg_command2_item1 "English"
+rls_string STRING_r_sg_command2_item2 "Turkish"
+rls_string STRING_r_sg_command2_item3 "Vietnamese"
+
 // used in settings menu
-rls_string STRING_r_sg_command6 "Değiştir"
+rls_string STRING_r_sg_command7 "Değiştir"
 
 
 // strings for settings cba
@@ -147,6 +155,10 @@ rls_string STRING_r_dlg6_prompt1 "Ekran görüntüsü Medya Galerisine kaydedild
 rls_string STRING_r_dlg6_prompt2 "%N ekran görüntüsü Medya Galerisine kaydedildi"
 
 rls_string STRING_r_dlg6_prompt3 "Video Medya Galerisine kaydedildi"
+
+// strings for (restart query)
+
+rls_string STRING_r_dlg7_prompt "Restart required! exit now?"
 
 // usage text string 
 

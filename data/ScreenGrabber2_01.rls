@@ -21,15 +21,23 @@ rls_string qtn_caption_string "SG2"
 // strings for menu commands 
 rls_string STRING_r_sg_command1 "Send to background"
 
-rls_string STRING_r_sg_command2 "Screen resolution"
+rls_string STRING_r_sg_command2 "Language"
 
-rls_string STRING_r_sg_command3 "Settings"
+rls_string STRING_r_sg_command3 "Screen resolution"
 
-rls_string STRING_r_sg_command4 "About"
+rls_string STRING_r_sg_command4 "Settings"
 
-rls_string STRING_r_sg_command5 "Exit"
+rls_string STRING_r_sg_command5 "About"
+
+rls_string STRING_r_sg_command6 "Exit"
+
+// Language items
+rls_string STRING_r_sg_command2_item1 "English"
+rls_string STRING_r_sg_command2_item2 "Turkish"
+rls_string STRING_r_sg_command2_item3 "Vietnamese"
+
 // used in settings menu
-rls_string STRING_r_sg_command6 "Change"
+rls_string STRING_r_sg_command7 "Change"
 
 
 // strings for settings cba
@@ -63,7 +71,7 @@ rls_string STRING_r_sg_item9  "Save path"
 
 rls_string STRING_r_sg_arr1_item1  "Single capture"
 
-rls_string STRING_r_sg_arr1_item2  "Sequantial capture"
+rls_string STRING_r_sg_arr1_item2  "Sequential capture"
 
 rls_string STRING_r_sg_arr1_item3  "Video capture"
 
@@ -147,6 +155,10 @@ rls_string STRING_r_dlg6_prompt1 "Screen shot saved to Media Gallery"
 rls_string STRING_r_dlg6_prompt2 "%N screen shots saved to Media Gallery"
 
 rls_string STRING_r_dlg6_prompt3 "Video saved to Media Gallery"
+
+// strings for (restart query)
+
+rls_string STRING_r_dlg7_prompt "Restart required! exit now?"
 
 // usage text string 
 

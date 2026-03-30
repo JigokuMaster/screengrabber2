@@ -55,7 +55,10 @@ class CScreenGrabberAppUi : public CAknViewAppUi
         */      
         ~CScreenGrabberAppUi();
         
-    public: // New functions
+    private: // New functions
+
+	TInt CurrentLanguageItemL();
+	void ChangeLanguageL(TInt aCommand);
 
     public: // Functions from base classes
         void HandleWsEventL(const TWsEvent& aEvent, CCoeControl* aDestination);
@@ -79,6 +82,7 @@ class CScreenGrabberAppUi : public CAknViewAppUi
         */
         virtual TKeyResponse HandleKeyEventL(
             const TKeyEvent& aKeyEvent,TEventCode aType);
+
 
     private: //Data
         CScreenGrabberModel*    iModel;

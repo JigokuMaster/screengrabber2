@@ -32,7 +32,7 @@ CAPABILITY        ReadDeviceData WriteDeviceData SwEvent
 
 //SMPSAFE
 
-LANG              SC 01 14
+LANG              SC 01 14 96
 
 
 START RESOURCE    ../data/ScreenGrabber2.rss

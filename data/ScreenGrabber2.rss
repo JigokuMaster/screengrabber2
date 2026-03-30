@@ -86,11 +86,22 @@ RESOURCE HOTKEYS r_screengrabber_hotkeys
 //
 //----------------------------------------------------
 //
+
+RESOURCE CBA r_screengrabber_softkeys_view1
+{
+    buttons = {
+	    CBA_BUTTON {id=EAknSoftkeyOptions; txt = STRING_r_sg_cba1;},
+	    CBA_BUTTON {id=EAknSoftkeyExit; txt = STRING_r_sg_command6; }
+    };
+}
+
+   
 RESOURCE AVKON_VIEW r_screengrabber_view1
     {
     hotkeys=r_screengrabber_hotkeys;
     menubar=r_screengrabber_menubar_view1;  
-    cba=R_AVKON_SOFTKEYS_OPTIONS_EXIT;    
+    //cba=R_AVKON_SOFTKEYS_OPTIONS_EXIT; 
+    cba=r_screengrabber_softkeys_view1;
     }
 
 //----------------------------------------------------
@@ -99,6 +110,8 @@ RESOURCE AVKON_VIEW r_screengrabber_view1
 //
 //----------------------------------------------------
 //
+    
+
 RESOURCE MENU_BAR r_screengrabber_menubar_view1
     {
     titles=
@@ -115,15 +128,18 @@ RESOURCE MENU_BAR r_screengrabber_menubar_view1
 //----------------------------------------------------
 //
 
+
+
 RESOURCE MENU_PANE r_screengrabber_view1_menu
     {
     items=
-        {
-        MENU_ITEM { command=EScreenGrabberCmdSendToBackground; txt=STRING_r_sg_command1; },
-        MENU_ITEM { command=EScreenGrabberCmdScreenResolution; cascade = r_screengrabber_resolution_submenu; txt=STRING_r_sg_command2; },
-        MENU_ITEM { command=EScreenGrabberCmdSettings; txt=STRING_r_sg_command3; },
-        MENU_ITEM { command=EScreenGrabberCmdAbout; txt=STRING_r_sg_command4; },
-        MENU_ITEM { command=EAknCmdExit; txt=STRING_r_sg_command5; }
+    {
+	MENU_ITEM { command=EScreenGrabberCmdSendToBackground; txt=STRING_r_sg_command1; },
+	MENU_ITEM { command=EScreenGrabberCmdChangeLanguage; cascade = r_screengrabber_language_submenu; txt=STRING_r_sg_command2; },
+	MENU_ITEM { command=EScreenGrabberCmdScreenResolution; cascade = r_screengrabber_resolution_submenu; txt=STRING_r_sg_command3; },
+        MENU_ITEM { command=EScreenGrabberCmdSettings; txt=STRING_r_sg_command4; },
+        MENU_ITEM { command=EScreenGrabberCmdAbout; txt=STRING_r_sg_command5; },
+        MENU_ITEM { command=EAknCmdExit; txt=STRING_r_sg_command6; }
         };
     }
 
@@ -134,6 +150,17 @@ RESOURCE MENU_PANE r_screengrabber_resolution_submenu
         };
     }
     
+RESOURCE MENU_PANE r_screengrabber_language_submenu
+{
+    items=
+    {
+	MENU_ITEM { command=EScreenGrabberCmdChangeLanguageItem1; txt=STRING_r_sg_command2_item1; flags=EEikMenuItemRadioStart | EEikMenuItemSymbolIndeterminate; },
+	MENU_ITEM { command=EScreenGrabberCmdChangeLanguageItem2; txt=STRING_r_sg_command2_item2; flags=EEikMenuItemRadioMiddle;},
+	MENU_ITEM { command=EScreenGrabberCmdChangeLanguageItem3; txt=STRING_r_sg_command2_item3; flags=EEikMenuItemRadioEnd; }
+    };
+}
+
+
 //----------------------------------------------------
 //   
 //    r_screengrabber_view2
@@ -182,8 +209,8 @@ RESOURCE MENU_PANE r_screengrabber_view2_menu
     {
     items=
         {
-        MENU_ITEM { command=EScreenGrabberCmdSettingsChange; txt=STRING_r_sg_command6; },
-        MENU_ITEM { command=EScreenGrabberCmdSettingsExit; txt=STRING_r_sg_command5; }
+        MENU_ITEM { command=EScreenGrabberCmdSettingsChange; txt=STRING_r_sg_command7; },
+        MENU_ITEM { command=EScreenGrabberCmdSettingsExit; txt=STRING_r_sg_command6; }
         };
     }
 
@@ -580,15 +607,11 @@ RESOURCE DIALOG r_screengrabber_about_dialog
         DLG_LINE
         {
             type = EAknCtMessageQuery;
-            id = EAknMessageQueryContentId;
-            control = AVKON_MESSAGE_QUERY
-            {
-                message = "ScreenGrabber 4.6.3 (2026) by JigokuMaster.\nbased on version 4.2.0 - 14th May 2009. Copyright © 2009 Nokia Corporation and/or its subsidiary(-ies). All rights reserved. Licensed under Eclipse Public License v1.0.";
-            };
+	    id = EAknMessageQueryContentId;
+	    control = AVKON_MESSAGE_QUERY {message = "";};
         }
     };
 }
-
 
 
 // resources for dialogs message, title ... etc
@@ -634,6 +657,12 @@ RESOURCE TBUF r_saved_query_prompt3
 {
     buf = STRING_r_dlg6_prompt3;
 }
+
+RESOURCE TBUF r_restart_confirmation_query_prompt
+{
+    buf = STRING_r_dlg7_prompt;
+}
+
 
 
 // ---------------------------------------------------------

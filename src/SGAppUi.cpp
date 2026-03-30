@@ -17,6 +17,7 @@
 
 
 // INCLUDE FILES
+#include "SGApp.h"
 #include "SGAppUi.h"
 #include "SGMainView.h"
 #include "SGSettingListView.h"
@@ -86,8 +87,14 @@ CScreenGrabberAppUi::~CScreenGrabberAppUi()
 // ------------------------------------------------------------------------------
 //
 void CScreenGrabberAppUi::DynInitMenuPaneL(
-    TInt /*aResourceId*/,CEikMenuPane* /*aMenuPane*/)
+    TInt aResourceId ,CEikMenuPane* aMenuPane)
     {
+	if (aResourceId == R_SCREENGRABBER_LANGUAGE_SUBMENU)
+        {
+	    TInt item = CurrentLanguageItemL();
+	    if (item) aMenuPane->SetItemButtonState(item, EEikMenuItemSymbolOn);
+	}
+
     }
 
 // ----------------------------------------------------
@@ -111,6 +118,11 @@ void CScreenGrabberAppUi::HandleCommandL(TInt aCommand)
     {
     switch ( aCommand )
         {
+	case EScreenGrabberCmdChangeLanguageItem1:
+	case EScreenGrabberCmdChangeLanguageItem2:
+	case EScreenGrabberCmdChangeLanguageItem3:
+	    ChangeLanguageL(aCommand);
+	    break;
         // a normal way to close an application
         case EAknCmdExit:
         case EEikCmdExit: 
@@ -120,9 +132,7 @@ void CScreenGrabberAppUi::HandleCommandL(TInt aCommand)
 	    {
 		CAknQueryDialog* exitQuery = CAknQueryDialog::NewL();
 		HBufC* prompt = iCoeEnv->AllocReadResourceLC(R_EXIT_CONFIRMATION_QUERY_PROMPT);
-            
 		exitQuery->SetPromptL(*prompt);  
-	    
 		CleanupStack::PopAndDestroy(prompt);
             if (exitQuery->ExecuteLD(R_MY_GENERAL_CONFIRMATION_QUERY)){
 		// pressed yes, exit
@@ -150,5 +160,63 @@ void CScreenGrabberAppUi::HandleWsEventL(const TWsEvent& aEvent, CCoeControl* aD
     if (iModel->HandleCaptureCommandsL(aEvent))
       	CAknAppUi::HandleWsEventL(aEvent, aDestination);  //continue the event loop if needed
     }
+
+TInt CScreenGrabberAppUi::CurrentLanguageItemL()
+{
+    CEikAppUi* appui = reinterpret_cast<CEikAppUi*>(iEikonEnv->AppUi());
+    CScreenGrabberDocument* doc = static_cast<CScreenGrabberDocument*>(appui->Document());
+    TUint32 lang = static_cast<CScreenGrabberApp*>(doc->Application())->iCurrentLanguage;
+    TInt item = 0;
+    switch (lang)
+    {
+	case ELangEnglish:
+	    item = EScreenGrabberCmdChangeLanguageItem1;
+	    break;
+	case ELangTurkish:
+	    item = EScreenGrabberCmdChangeLanguageItem2;
+	    break;
+	case ELangVietnamese:
+	    item = EScreenGrabberCmdChangeLanguageItem3;
+	    break;
+	default: break;
+    }
+    return item;
+
+}
+
+
+void CScreenGrabberAppUi::ChangeLanguageL(TInt aCommand)
+{
+    TLanguage lang = ELangTest;
+    switch (aCommand)
+    {
+	case EScreenGrabberCmdChangeLanguageItem1:
+	    lang = ELangEnglish;
+	    break;
+	case EScreenGrabberCmdChangeLanguageItem2:
+	    lang = ELangTurkish;
+	    break;
+	case EScreenGrabberCmdChangeLanguageItem3:
+	    lang = ELangVietnamese;
+	    break;
+    }
+
+    if (lang)
+    {
+	
+	CEikAppUi* appui = reinterpret_cast<CEikAppUi*>(iEikonEnv->AppUi());
+	CScreenGrabberDocument* doc = static_cast<CScreenGrabberDocument*>(appui->Document());
+	TBool ok = static_cast<CScreenGrabberApp*>(doc->Application())->SaveLanguageL(lang);
+	if (ok)
+	{
+	    CAknQueryDialog* exitQuery = CAknQueryDialog::NewL();
+	    HBufC* prompt = iCoeEnv->AllocReadResourceLC(R_RESTART_CONFIRMATION_QUERY_PROMPT);
+	    exitQuery->SetPromptL(*prompt);  
+	    CleanupStack::PopAndDestroy(prompt);
+            if (exitQuery->ExecuteLD(R_MY_GENERAL_CONFIRMATION_QUERY)) Exit();
+	}
+    }
+
+}
 
 // End of File  
