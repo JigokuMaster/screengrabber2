@@ -398,5 +398,17 @@ void CScreenGrabberMainContainer::HandleScrollEventL(CEikScrollBar* aScrollBar, 
         }
     }
 
+void CScreenGrabberMainContainer::HandlePointerEventL(const TPointerEvent &aPointerEvent)
+{
+    CCoeControl::HandlePointerEventL(aPointerEvent);
+    if (iScrollBarFrame){
+	CEikScrollBar* horizontalBar = iScrollBarFrame->GetScrollBarHandle(CEikScrollBar::EVertical);
+	if (horizontalBar) horizontalBar->HandlePointerEventL(aPointerEvent);
+	CEikScrollBar* verticalBar = iScrollBarFrame->GetScrollBarHandle(CEikScrollBar::EHorizontal);
+	if (verticalBar) verticalBar->HandlePointerEventL(aPointerEvent);
+    }
+}
+
+
     
 // End of File  

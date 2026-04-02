@@ -39,7 +39,7 @@
  #include <UikonInternalPSKeys.h>
 #endif
 
-_LIT(KAboutText, "version 4.7.2 (2026) built by JigokuMaster.\n"
+_LIT(KAboutText, "version 4.7.3 (2026) built by JigokuMaster.\n"
 	"based on version 4.2.0 - 14th May 2009. Copyright © 2009 Nokia Corporation and/or its subsidiary(-ies), "
 	"All rights reserved. Licensed under Eclipse Public License v1.0\n\n"
 	"Thanks to:\n" 

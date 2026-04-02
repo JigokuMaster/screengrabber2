@@ -21,7 +21,7 @@ rls_string qtn_caption_string "SG2"
 // strings for menu commands 
 rls_string STRING_r_sg_command1 "Chạy Nền"
 
-rls_string STRING_r_sg_command2 "Language"
+rls_string STRING_r_sg_command2 "Ngôn ngữ"
 
 rls_string STRING_r_sg_command3 "Tỉ lệ màn hình"
 
@@ -32,9 +32,9 @@ rls_string STRING_r_sg_command5 "Thông tin ứng dụng"
 rls_string STRING_r_sg_command6 "Thoát"
 
 // Language items
-rls_string STRING_r_sg_command2_item1 "English"
-rls_string STRING_r_sg_command2_item2 "Turkish"
-rls_string STRING_r_sg_command2_item3 "Vietnamese"
+rls_string STRING_r_sg_command2_item1 "Tiếng Anh"
+rls_string STRING_r_sg_command2_item2 "Tiếng Thổ Nhĩ Kì"
+rls_string STRING_r_sg_command2_item3 "Tiếng Việt"
 
 // used in settings menu
 rls_string STRING_r_sg_command7 "Thay đổi"
@@ -157,7 +157,7 @@ rls_string STRING_r_dlg6_prompt3 "Video đã được lưu vào thư viện"
 
 // strings for (restart query)
 
-rls_string STRING_r_dlg7_prompt "Restart required! exit now?"
+rls_string STRING_r_dlg7_prompt "Cần khởi động lại để lưu thay đổi, khởi động lại ngay?"
 
 // usage text string 
 

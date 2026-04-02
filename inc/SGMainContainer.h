@@ -70,6 +70,8 @@ class CScreenGrabberMainContainer : public CCoeControl, MCoeControlObserver, MEi
         
 	private:
 		TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode /*aType*/);
+
+		void HandlePointerEventL(const TPointerEvent &aPointerEvent);
     
     private:
         void UpdateVisualContentL(TBool aScrollToBottom);

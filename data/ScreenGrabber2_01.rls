@@ -158,7 +158,7 @@ rls_string STRING_r_dlg6_prompt3 "Video saved to Media Gallery"
 
 // strings for (restart query)
 
-rls_string STRING_r_dlg7_prompt "Restart required! exit now?"
+rls_string STRING_r_dlg7_prompt "Restart required to apply change, Exit now?"
 
 // usage text string 
 
