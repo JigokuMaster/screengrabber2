@@ -21,7 +21,7 @@ rls_string qtn_caption_string "SG2"
 // strings for menu commands 
 rls_string STRING_r_sg_command1 "Arka plana gönder"
 
-rls_string STRING_r_sg_command2 "Language"
+rls_string STRING_r_sg_command2 "Uygulama dili"
 
 rls_string STRING_r_sg_command3 "Ekran çözünürlüğü"
 
@@ -32,9 +32,9 @@ rls_string STRING_r_sg_command5 "Hakkında"
 rls_string STRING_r_sg_command6 "Çıkış"
 
 // Language items
-rls_string STRING_r_sg_command2_item1 "English"
-rls_string STRING_r_sg_command2_item2 "Turkish"
-rls_string STRING_r_sg_command2_item3 "Vietnamese"
+rls_string STRING_r_sg_command2_item1 "İngilizce"
+rls_string STRING_r_sg_command2_item2 "Türkçe"
+rls_string STRING_r_sg_command2_item3 "Vietnamca"
 
 // used in settings menu
 rls_string STRING_r_sg_command7 "Değiştir"
@@ -125,7 +125,7 @@ rls_string STRING_r_sg_arr4_item7   "MBM"
 
 rls_string STRING_r_sg_arr5_item1   "Animasyonlu GIF"
 
-rls_string STRING_r_sg_arr5_item2   "YK Animasyonlu GIF"
+rls_string STRING_r_sg_arr5_item2   "Animasyonlu GIF yüksek kalite"
 
 // strings for dialog (Custom key)
 
