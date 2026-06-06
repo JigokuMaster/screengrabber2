@@ -1,0 +1,48 @@
+
+TARGET			libx264.lib
+TARGETTYPE		lib
+
+
+USERINCLUDE .. ../common ../encoder
+SYSTEMINCLUDE /epoc32/include /epoc32/include/stdapis
+
+
+MACRO HIGH_BIT_DEPTH=0 
+MACRO BIT_DEPTH=8
+
+SOURCEPATH ../common
+SOURCE osdep.c
+SOURCE base.c
+SOURCE cpu.c
+SOURCE tables.c 
+SOURCE mc.c
+SOURCE predict.c
+SOURCE pixel.c
+SOURCE common-macroblock.c
+SOURCE frame.c
+SOURCE dct.c
+SOURCE common-cabac.c
+SOURCE common.c
+SOURCE rectangle.c
+SOURCE common-set.c
+SOURCE quant.c
+SOURCE deblock.c
+SOURCE vlc.c 
+SOURCE mvpred.c
+SOURCE bitstream.c
+
+SOURCEPATH ../encoder
+SOURCE api.c       
+SOURCE analyse.c
+SOURCE me.c
+SOURCE ratecontrol.c
+SOURCE set.c
+SOURCE macroblock.c
+SOURCE cabac.c
+SOURCE cavlc.c
+SOURCE encoder.c
+SOURCE lookahead.c
+
+
+OPTION GCCE -std=c99
+

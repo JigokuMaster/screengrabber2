@@ -1108,8 +1108,240 @@ void CScreenGrabberModel::CaptureFrameForVideoHQL()
     // indicate an outstanding request
     SetActive();
 }
+
+#ifdef WITH_MP4VIDEO_SUPPORT
+
+void CScreenGrabberModel::CaptureFrameForMP4VideoL()
+{
+	// record time
+    
+	TTime timeNow;
+	timeNow.HomeTime();
+    
+	// take a screen shot	
+ 	CFbsBitmap* currentCapturedBitmap = new(ELeave) CFbsBitmap;
+ 	CleanupStack::PushL(currentCapturedBitmap);
+
+	CWsScreenDevice* screenDevice = new(ELeave) CWsScreenDevice( CEikonEnv::Static()->WsSession() );
+	CleanupStack::PushL( screenDevice );
+	TInt screenDeviceNumber = iEnv->WsSession().GetFocusScreen();
+	if (iSecondScreenAvailable && iGrabSettings.iScreenDevice != screenDeviceNumber)
+	{
+	    screenDeviceNumber = iGrabSettings.iScreenDevice;
+	}
+
+	User::LeaveIfError( screenDevice->Construct(screenDeviceNumber) );
+
+	// get info of the RAM drive
+	TDriveNumber ramDrive = EDriveD;
+	TVolumeInfo ramDriveInfo;
+	iEnv->FsSession().Volume(ramDriveInfo, ramDrive);
+	// need at least 20MB of free RAM.
+	TBool useRAMDisk = (ramDriveInfo.iFree >= 0x1400000);
+
+	TDisplayMode displayMode = screenDevice->DisplayMode(); 
+	if ( !useRAMDisk ) displayMode = EColor16M;// switch to 24bpp
+
+	TSize currentScreenSize = screenDevice->SizeInPixels();
+
+	User::LeaveIfError( currentCapturedBitmap->Create(currentScreenSize, displayMode) );
+	User::LeaveIfError( screenDevice->CopyScreenToBitmap(currentCapturedBitmap) );
+	CleanupStack::PopAndDestroy(); // screenDevice
+
+	// grow video's dimensions if the size has changed
+	if (currentScreenSize.iWidth > iVideoDimensions.iWidth)
+	    {
+	    iVideoDimensions.iWidth = currentScreenSize.iWidth;
+	    }
+	if (currentScreenSize.iHeight > iVideoDimensions.iHeight)
+	    {
+	    iVideoDimensions.iHeight = currentScreenSize.iHeight;
+	    }
+
+    TInt64 currentDelay(0);
+ 
+    // play a beep sound every 30th frame
+    if (iCurrentFrameNumber%30 == 0)
+        PlayBeepSound();
+
+    // create a new frame
+    TVideoFrame frame;
+    frame.iDelay = 500; // use default delay 5.00 secs
+    
+    
+    // init the directory for saving the file, preferably use ram drive if there is enough disk space, otherwise use always C drive
+    TFileName tempDirectory;
+    TFileName sessionPath;
+    
+    if ( useRAMDisk ) 
+        sessionPath.Copy( _L("D:") );
+    else
+        sessionPath.Copy( _L("C:") );
+
+    sessionPath.Append(KSGTemporaryDirectory);
+    tempDirectory.Copy(KSGTemporaryDirectory);
+    
+    iEnv->FsSession().MkDirAll(sessionPath);
+    iEnv->FsSession().SetSessionPath(sessionPath);
+
+    // create a temp file, path to the bitmap is saved automatically to frame.iFileStorePath
+    RFile file;
+    User::LeaveIfError( file.Temp(iEnv->FsSession(), tempDirectory, frame.iFileStorePath, EFileWrite) );
+    RFileWriteStream writeStream(file);
+    
+    TBool ignoreFrame(EFalse);
+    
+    frame.iWidth = currentScreenSize.iWidth;    
+    frame.iHeight = currentScreenSize.iHeight;  
+    frame.iXPos = 0;
+    frame.iYPos = 0;
+    frame.iFillsWholeScreen = ETrue;
+ 
+    // check if is this the first frame
+    if (iCurrentFrameNumber == 0)
+        {
+        // first frame,  no comparison needed
+       
+        currentCapturedBitmap->ExternalizeL(writeStream);  
+
+        }
+    
+    else
+        {
+        // next frame is a difference between the previous one
+        currentDelay = timeNow.MicroSecondsFrom(iPreviousFrameTaken).Int64();
+        
+        // get reference to previos frame
+        TVideoFrame& prevFrame = iVideoFrameArray->At(iVideoFrameArray->Count()-1);
+        
+        
+        // check if video dimensions have changed
+        if (currentScreenSize.iWidth != iPreviousFrameScreenDimension.iWidth
+            || currentScreenSize.iHeight != iPreviousFrameScreenDimension.iHeight)
+            {
+		// not supported by msf_gif
+		User::Leave(KErrArgument);
+            }
+
+        else
+            {
+
+
+	    TInt bpp = TDisplayModeUtils::NumDisplayModeBitsPerPixel(displayMode);
+
+            // compare the bitmaps
+            HBufC8* curImgScanLineBuf = HBufC8::NewLC(currentScreenSize.iWidth*bpp);
+            TPtr8 curImgScanLinePtr = curImgScanLineBuf->Des();
+            HBufC8* prevImgScanLineBuf = HBufC8::NewLC(currentScreenSize.iWidth*bpp);
+            TPtr8 prevImgScanLinePtr = prevImgScanLineBuf->Des();
+            
+            TPoint pt(0,0);
+            TBool differenceFound(EFalse);
+        
+            // scan the image from top to bottom
+            for (TInt i=0; i<currentScreenSize.iHeight; i++)
+	    {
+		pt.iY = i;              
+                currentCapturedBitmap->GetScanLine(curImgScanLinePtr, pt, currentScreenSize.iWidth, displayMode);
+
+		iPreviouslyCapturedBitmap->GetScanLine(prevImgScanLinePtr, pt, currentScreenSize.iWidth, displayMode);
+                
+                if (curImgScanLinePtr != prevImgScanLinePtr)
+		{
+                    differenceFound = ETrue;
+                    break;    
+                }
+
+            }
+                
+            if (differenceFound)
+                {
+		
+		currentCapturedBitmap->ExternalizeL(writeStream);
+  
+                // update the previous frame to contain the new delay value
+                prevFrame.iDelay = TUint( (double) currentDelay / 10000 );
+                }
+
+            else
+                {
+                // frames are identical, we can just ignore this one
+                ignoreFrame = ETrue;     
+                }
+            
+            CleanupStack::PopAndDestroy(2); //curImgScanLineBuf,prevImgScanLineBuf
+
+            } 
+        } 
+
+    // close the stream
+    writeStream.CommitL();
+    writeStream.Close();
+    file.Close();
     
 
+    if (ignoreFrame)
+        {
+        // delete the temp file since we don't need that
+        iEnv->FsSession().Delete(frame.iFileStorePath);
+        }
+    else
+        {
+        // remember for the next frame when this frame was taken
+        iPreviousFrameTaken = timeNow;
+
+        // take a copy of currentCapturedBitmap to iPreviouslyCapturedBitmap
+        User::LeaveIfError( iPreviouslyCapturedBitmap->Create(iVideoDimensions, displayMode) );
+
+        TPoint pt(0,0);
+        HBufC8* tempScanLineBuf = HBufC8::NewMaxLC(iVideoDimensions.iWidth);
+        TPtr8 tempScanLinePtr = tempScanLineBuf->Des();
+        
+        for (TInt i=0; i<iVideoDimensions.iHeight; i++)
+            {
+            pt.iY = i;
+            currentCapturedBitmap->GetScanLine(tempScanLinePtr, pt, iVideoDimensions.iWidth, displayMode);
+            iPreviouslyCapturedBitmap->SetScanLine(tempScanLinePtr, i);
+            }
+            
+        CleanupStack::PopAndDestroy(); //tempScanLineBuf
+        
+        // append frame information to the array
+        iVideoFrameArray->AppendL(frame);
+        
+        // remember screen size
+        iPreviousFrameScreenDimension = currentScreenSize;
+        }    
+
+    
+    CleanupStack::PopAndDestroy(); //currentCapturedBitmap
+    
+
+    // set the state of the active object
+    iState = ENextVideoFrame;
+	
+    // check time spent on the work above (probably this is not so important)
+    TTime timeNow2;
+    timeNow2.HomeTime();
+    TInt64 handlingDelay = timeNow2.MicroSecondsFrom(timeNow).Int64();
+    
+	// calculate delay till next frame
+    TUint idealDelay = VIDEO_CAPTURE_DELAY*1000;
+    TInt usedDelay; 
+    if (currentDelay > idealDelay) usedDelay = idealDelay - (currentDelay - idealDelay) - handlingDelay;
+
+    else usedDelay = idealDelay - handlingDelay;
+	
+    // check that the delay is atleast minimum delay anyway
+    if (usedDelay < VIDEO_CAPTURE_MINIMUM_DELAY*1000) usedDelay = VIDEO_CAPTURE_MINIMUM_DELAY*1000;
+	
+    
+    iTimer.After(iStatus, usedDelay);
+    // indicate an outstanding request
+    SetActive();
+}
+
+#endif
 
 void CScreenGrabberModel::CaptureFrameForVideoL()
     { 
@@ -1121,6 +1353,13 @@ void CScreenGrabberModel::CaptureFrameForVideoL()
 	    return;
 	}
 
+#ifdef WITH_MP4VIDEO_SUPPORT
+	else if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatMP4)
+	{
+	    CaptureFrameForMP4VideoL();
+	    return;
+	}
+#endif
 	// record time  
 	TTime timeNow; 
 	timeNow.HomeTime();
@@ -1137,8 +1376,7 @@ void CScreenGrabberModel::CaptureFrameForVideoL()
 	    screenDeviceNumber = iGrabSettings.iScreenDevice;
 	}
 	User::LeaveIfError( screenDevice->Construct(screenDeviceNumber) );
-	
-    TSize currentScreenSize = screenDevice->SizeInPixels();
+	TSize currentScreenSize = screenDevice->SizeInPixels();
 
 	User::LeaveIfError( currentCapturedBitmap->Create(currentScreenSize, EColor256) );
 	User::LeaveIfError( screenDevice->CopyScreenToBitmap(currentCapturedBitmap) );
@@ -1601,10 +1839,9 @@ void CScreenGrabberModel::RunL()
 
 void CScreenGrabberModel::SaveVideoL(TInt aErr)
     {
-    if (aErr)
-        CapturingFinishedL(aErr);   
+    if (aErr) CapturingFinishedL(aErr);   
    
-    else if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIF || iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIFHQ)
+    else if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIF || iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIFHQ || iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatMP4)
         {
         TInt err(KErrNone);
         
@@ -1627,7 +1864,16 @@ void CScreenGrabberModel::SaveVideoL(TInt aErr)
             iSaveFileName.Append( KDefaultVideoFileName );
 
         // create and save the gif animation
-	if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIFHQ)
+	if ( iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIFHQ ) {
+
+	    iSaveFileName.Append( _L(".gif") );
+     
+	    CApaApplication::GenerateFileName(iEnv->FsSession(), iSaveFileName );  // unique filename
+
+	    err = CGifAnimator::CreateGifAnimation(iSaveFileName, iVideoDimensions, iVideoFrameArray);
+	}
+
+	else if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatAnimatedGIFHQ)
 	{
         
 	    iSaveFileName.Append( _L("_HQ.gif") );
@@ -1637,16 +1883,20 @@ void CScreenGrabberModel::SaveVideoL(TInt aErr)
 	    err = CGifHQAnimator::CreateGifAnimation(iSaveFileName, iVideoDimensions, iVideoFrameArray);
  
 	}
-	else{
 
-	    iSaveFileName.Append( _L(".gif") );
-     
+#ifdef WITH_MP4VIDEO_SUPPORT
+	else if (iGrabSettings.iVideoCaptureVideoFormat == EVideoFormatMP4)
+	{
+        
+	    iSaveFileName.Append( _L(".mp4") );
+       
 	    CApaApplication::GenerateFileName(iEnv->FsSession(), iSaveFileName );  // unique filename
 
-	    err = CGifAnimator::CreateGifAnimation(iSaveFileName, iVideoDimensions, iVideoFrameArray);
-	}
-
+	    err = CMP4Exporter::Create(iSaveFileName, iVideoDimensions, iVideoFrameArray);
  
+	}
+#endif
+
         // remove the saved file in case of errors since it's likely corrupted
         if (err != KErrNone)
             iEnv->FsSession().Delete(iSaveFileName);
@@ -1760,6 +2010,10 @@ TBool CScreenGrabberModel::MemoryCardOK()
 	}
 */
 
+TPtrC CScreenGrabberModel::SavePath()
+{
+    return iGrabSettings.iSavePath;
+}
 
 TBool CScreenGrabberModel::SavePathOK()
 {

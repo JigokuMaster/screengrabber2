@@ -27,7 +27,7 @@
 // FORWARD DECLARATIONS
 class CEikScrollBarFrame;
 class CAknsBasicBackgroundControlContext;
-
+class CEikGlobalTextEditor;
 
 // CLASS DECLARATION
 
@@ -35,7 +35,7 @@ class CAknsBasicBackgroundControlContext;
 *  CScreenGrabberMainContainer  container control class.
 *  
 */
-class CScreenGrabberMainContainer : public CCoeControl, MCoeControlObserver, MEikScrollBarObserver
+class CScreenGrabberMainContainer : public CCoeControl, MCoeControlObserver
     {
     public: // Constructors and destructor
         
@@ -50,46 +50,27 @@ class CScreenGrabberMainContainer : public CCoeControl, MCoeControlObserver, MEi
         */
         ~CScreenGrabberMainContainer();
 
-    public: // New functions
+    protected: // Functions from base classes
 
-        void PrintText(const TDesC& aDes);
-        void ClearOutputWindow();
-
-
-    public: // Functions from base classes
-
-    private: // Functions from base classes
-
-        void Draw(const TRect& aRect) const;
+        void SizeChanged();
+        TInt CountComponentControls() const;
+        CCoeControl* ComponentControl(TInt aIndex) const;
         void HandleControlEventL(CCoeControl* aControl,TCoeEvent aEventType);
-        TTypeUid::Ptr MopSupplyObject(TTypeUid aId);
-
+	TTypeUid::Ptr MopSupplyObject(TTypeUid aId);
     public:
         void HandleResourceChange(TInt aType);
-        void HandleScrollEventL(CEikScrollBar* aScrollBar,TEikScrollEvent aEventType); // From MEikScrollBarObserver
-        
-	private:
-		TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode /*aType*/);
-
-		void HandlePointerEventL(const TPointerEvent &aPointerEvent);
+       
+    private:
+	TKeyResponse OfferKeyEventL(const TKeyEvent& aKeyEvent, TEventCode /*aType*/);
+	void HandlePointerEventL(const TPointerEvent &aPointerEvent);
     
     private:
-        void UpdateVisualContentL(TBool aScrollToBottom);
+        void UpdateVisualContentL();
 
     private: //data
-        CEikScrollBarFrame*     iScrollBarFrame;
         HBufC*                  iText;
-        const CFont*            iFont;
-        HBufC*                  iWrapperString;
-        CArrayFix<TPtrC>*       iWrappedArray;
-        TInt                    iCurrentLine;
-        TInt                    iLineCount;
-        TInt                    iNumberOfLinesFitsScreen;
-        TInt                    iLeftDrawingPosition;
-        TReal                   iX_factor;
-        TReal                   iY_factor;
-
         CAknsBasicBackgroundControlContext* iSkinContext;
+	CEikGlobalTextEditor*	iTextView;
 
 
     };

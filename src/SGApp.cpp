@@ -26,6 +26,22 @@
 #include <coemain.h>
 #include <s32file.h>
 
+
+_LIT(KLangSetFileName, "screengrabber2_lang.ini");
+_LIT(KEngResFileNameFormat, "%S:\\Resource\\Apps\\ScreenGrabber2.rsc");
+_LIT(KResFileNameFormat0, "%S:\\Resource\\Apps\\ScreenGrabber2.r0%d");
+_LIT(KResFileNameFormat, "%S:\\Resource\\Apps\\ScreenGrabber2.r%d");
+
+static void GetPrivateFilePathL(RFs& aRfs, TFileName &aFilePath, const TDesC &aFileName)
+{
+
+    User::LeaveIfError(aRfs.PrivatePath(aFilePath));
+    // insert the "drive:" into the private path.
+    aFilePath.Insert(0, RProcess().FileName().Left(2));
+    aFilePath.Append(aFileName);
+}
+
+
 // ================= MEMBER FUNCTIONS =======================
 
 // ---------------------------------------------------------
@@ -56,32 +72,37 @@ TFileName CScreenGrabberApp::ResourceFileName() const
     return CAknApplication::ResourceFileName(); 
 }
 
-_LIT(KLangFileName, "screengrabber2_lang.ini");
-_LIT(KResFileNameFormat0, "%S:\\Resource\\Apps\\ScreenGrabber2.r0%d");
-_LIT(KResFileNameFormat, "%S:\\Resource\\Apps\\ScreenGrabber2.r%d");
 
 TBool CScreenGrabberApp::ReadLanguageL(TFileName &aFileName) const
 {
+    TFileName storePath;
     RFs& fs = iCoeEnv->FsSession();
-    if (fs.SetSessionToPrivate(EDriveC) == KErrNone)
+    GetPrivateFilePathL(fs, storePath, KLangSetFileName);
+    if (BaflUtils::FileExists(fs, storePath))
     {
-        if (!BaflUtils::FileExists(fs, KLangFileName)) return EFalse;
 
-        CDictionaryFileStore* settingsStore = CDictionaryFileStore::OpenLC(fs, KLangFileName, KUidScreenGrabber);
 	RDictionaryReadStream in;
+
+        CDictionaryFileStore* settingsStore = CDictionaryFileStore::OpenLC(fs, storePath, KUidScreenGrabber);
         in.OpenLC(*settingsStore, TUid::Uid(0x1));
-        TRAPD(err, iCurrentLanguage = (TLanguage)in.ReadUint32L());
+        
+	TRAPD(err, iCurrentLanguage = (TLanguage)in.ReadUint32L());
         CleanupStack::PopAndDestroy(2); // in, settingsStore 
 	if (err == KErrNone)
 	{
 	    TPtrC driveChar = AppFullName().Left(1);
 	    if (iCurrentLanguage > 9) aFileName.Format(KResFileNameFormat, &driveChar, iCurrentLanguage);
-	    else aFileName.Format(KResFileNameFormat0, &driveChar, iCurrentLanguage);
+	    else 
+	    {
+		if (iCurrentLanguage == ELangEnglish) aFileName.Format(KEngResFileNameFormat, &driveChar);
+		else aFileName.Format(KResFileNameFormat0, &driveChar, iCurrentLanguage);
+	    }
 	    return ETrue;
 	}
     }
     
     return EFalse;
+
 }
 
 TBool CScreenGrabberApp::SaveLanguageL(const TLanguage aLanguage)
@@ -90,29 +111,35 @@ TBool CScreenGrabberApp::SaveLanguageL(const TLanguage aLanguage)
 
     RFs& fs = iCoeEnv->FsSession();
     TFileName res;
+
     TPtrC driveChar = AppFullName().Left(1);
     if (aLanguage > 9) res.Format(KResFileNameFormat, &driveChar, aLanguage);
-    else res.Format(KResFileNameFormat0, &driveChar, aLanguage);
 
-    if (!BaflUtils::FileExists(CCoeEnv::Static()->FsSession(), res) && aLanguage!= ELangEnglish) return EFalse;
-
-    if (fs.SetSessionToPrivate(EDriveC) == KErrNone)
-    {
-        // delete existing store to make sure that it is clean and not eg corrupted
-        if (BaflUtils::FileExists(fs, KLangFileName))
-        {
-	    fs.Delete(KLangFileName);
-        }
-	
-        CDictionaryFileStore* settingsStore = CDictionaryFileStore::OpenLC(fs, KLangFileName, KUidScreenGrabber);
-	RDictionaryWriteStream out;
-	out.AssignLC(*settingsStore, TUid::Uid(0x1));
-	out.WriteUint32L(aLanguage);
-	out.CommitL(); 	
-        settingsStore->CommitL();
-        CleanupStack::PopAndDestroy(2); // out, settingsStore 
-	iCurrentLanguage = aLanguage;
+    else{
+	if (aLanguage == ELangEnglish) res.Format(KEngResFileNameFormat, &driveChar);
+	else res.Format(KResFileNameFormat0, &driveChar, aLanguage);
     }
+
+    if (!BaflUtils::FileExists(CCoeEnv::Static()->FsSession(), res)) return EFalse;
+
+    TFileName storePath;
+    GetPrivateFilePathL(fs, storePath, KLangSetFileName);
+
+    // delete existing store to make sure that it is clean and not eg corrupted
+    if (BaflUtils::FileExists(fs, storePath))
+    {
+	fs.Delete(storePath);
+    }
+
+    RDictionaryWriteStream out;
+
+    CDictionaryFileStore* settingsStore = CDictionaryFileStore::OpenLC(fs, storePath, KUidScreenGrabber);
+    out.AssignLC(*settingsStore, TUid::Uid(0x1));
+    out.WriteUint32L(aLanguage);
+    out.CommitL(); 	
+    settingsStore->CommitL();
+    CleanupStack::PopAndDestroy(2); // out, settingsStore 
+    iCurrentLanguage = aLanguage;
     return ETrue;
 }
 

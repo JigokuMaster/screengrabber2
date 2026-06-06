@@ -25,11 +25,13 @@ rls_string STRING_r_sg_command2 "Ngôn ngữ"
 
 rls_string STRING_r_sg_command3 "Tỉ lệ màn hình"
 
-rls_string STRING_r_sg_command4 "Cài đặt"
+rls_string STRING_r_sg_command4 "Saved shots"
 
-rls_string STRING_r_sg_command5 "Thông tin ứng dụng"
+rls_string STRING_r_sg_command5 "Cài đặt"
 
-rls_string STRING_r_sg_command6 "Thoát"
+rls_string STRING_r_sg_command6 "Thông tin ứng dụng"
+
+rls_string STRING_r_sg_command7 "Thoát"
 
 // Language items
 rls_string STRING_r_sg_command2_item1 "Tiếng Anh"
@@ -37,7 +39,12 @@ rls_string STRING_r_sg_command2_item2 "Tiếng Thổ Nhĩ Kì"
 rls_string STRING_r_sg_command2_item3 "Tiếng Việt"
 
 // used in settings menu
-rls_string STRING_r_sg_command7 "Thay đổi"
+rls_string STRING_r_sg_command8 "Thay đổi"
+
+
+// used in savedshots window menu
+rls_string STRING_r_sg_command9 "Delete"
+rls_string STRING_r_sg_command10 "Send"
 
 // strings for settings cba
 
@@ -126,6 +133,8 @@ rls_string STRING_r_sg_arr5_item1   "Ảnh động (GIF)"
 
 rls_string STRING_r_sg_arr5_item2   "Ảnh động chất lượng cao"
 
+rls_string STRING_r_sg_arr5_item3   "MP4"
+
 // strings for dialog (Custom key)
 
 rls_string STRING_r_dlg1_label  "Bấm phím gì đó:" 
@@ -158,6 +167,11 @@ rls_string STRING_r_dlg6_prompt3 "Video đã được lưu vào thư viện"
 // strings for (restart query)
 
 rls_string STRING_r_dlg7_prompt "Cần khởi động lại để lưu thay đổi, khởi động lại ngay?"
+
+// strings for (Delete shot query)
+
+rls_string STRING_r_dlg8_prompt "Delete %U?"
+
 
 // usage text string 
 

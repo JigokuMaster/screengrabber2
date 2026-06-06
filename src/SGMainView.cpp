@@ -28,6 +28,8 @@
 #include  "SGMainView.h"
 #include  "SGMainContainer.h"
 #include  "SGSettingListView.h"
+#include  "SGSavedShotsView.h" // KSavedShotsViewUID
+#include "SGAboutView.h"
 #include  "SGDocument.h" 
 #include  "SGModel.h"
 
@@ -39,15 +41,7 @@
  #include <UikonInternalPSKeys.h>
 #endif
 
-_LIT(KAboutText, "version 4.7.3 (2026) built by JigokuMaster.\n"
-	"based on version 4.2.0 - 14th May 2009. Copyright © 2009 Nokia Corporation and/or its subsidiary(-ies), "
-	"All rights reserved. Licensed under Eclipse Public License v1.0\n\n"
-	"Thanks to:\n" 
-	"• Symbuzzer  (Turkish translation)\n"
-	"• Lee Nguyen  (Vietnamese translation)\n" 
-	"• WunderWungiel (App icon)\n"
-	"• gtrxAC, Matthew, MaxBondarchenko (Feature suggestions)\n"
-	"• notnullnotvoid@github.com (msf_gif library)");
+
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -187,14 +181,18 @@ void CScreenGrabberMainView::HandleCommandL(TInt aCommand)
             
             CWsScreenDevice* screenDevice = CEikonEnv::Static()->ScreenDevice();
             TInt err = RProperty::Define(KPSUidUikon, KUikLayoutState, RProperty::EInt);
-            err = RProperty::Set(KPSUidUikon, KUikLayoutState, state);
-
+	    err = RProperty::Set(KPSUidUikon, KUikLayoutState, state);
             screenDevice->SetScreenMode(screenMode);
-	    
             break;	    
             }
 #endif
-            
+
+        case EScreenGrabberCmdSavedShots:
+            {
+            AppUi()->ActivateLocalViewL(KSavedShotsViewUID);
+            break;
+            }
+
         case EScreenGrabberCmdSettings:
             {
             AppUi()->ActivateLocalViewL( KSettingListViewUID );
@@ -203,10 +201,7 @@ void CScreenGrabberMainView::HandleCommandL(TInt aCommand)
 
         case EScreenGrabberCmdAbout:
             {
-	        CAknMessageQueryDialog* dialog = new (ELeave) CAknMessageQueryDialog;
-		dialog->PrepareLC(R_SCREENGRABBER_ABOUT_DIALOG);
-		dialog->SetMessageTextL(KAboutText);
-		dialog->RunLD();
+	        AppUi()->ActivateLocalViewL( KAboutViewUID );
             }
             break;
         

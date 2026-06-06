@@ -1,6 +1,5 @@
-#ifdef PIPS
-#include <stdapis/sys/stdint.h>
-#else
+// this header file is originally by shinovon.
+
 #ifndef _SYS_STDINT_H_
 #define _SYS_STDINT_H_
 
@@ -26,4 +25,4 @@ typedef	__uint32_t	uintptr_t;
 #define	SIZE_MAX	UINT32_MAX
 
 #endif /* !_SYS_STDINT_H_ */
-#endif
+

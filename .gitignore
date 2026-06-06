@@ -1,2 +1,4 @@
+*.old
 sis/ScreenGrabber2_gcce.sis
+data/tmp/
 

@@ -32,7 +32,7 @@ NAME SGRB
 #include "ScreenGrabber2.rls"
 //#include <data_caging_paths_strings.hrh>
 #include <appinfo.rh>
-
+#include "../group/screengrabber2.mmh"
 
 // ---------------------------------------------------------
 //   
@@ -91,7 +91,7 @@ RESOURCE CBA r_screengrabber_softkeys_view1
 {
     buttons = {
 	    CBA_BUTTON {id=EAknSoftkeyOptions; txt = STRING_r_sg_cba1;},
-	    CBA_BUTTON {id=EAknSoftkeyExit; txt = STRING_r_sg_command6; }
+	    CBA_BUTTON {id=EAknSoftkeyExit; txt = STRING_r_sg_command7; }
     };
 }
 
@@ -137,9 +137,10 @@ RESOURCE MENU_PANE r_screengrabber_view1_menu
 	MENU_ITEM { command=EScreenGrabberCmdSendToBackground; txt=STRING_r_sg_command1; },
 	MENU_ITEM { command=EScreenGrabberCmdChangeLanguage; cascade = r_screengrabber_language_submenu; txt=STRING_r_sg_command2; },
 	MENU_ITEM { command=EScreenGrabberCmdScreenResolution; cascade = r_screengrabber_resolution_submenu; txt=STRING_r_sg_command3; },
-        MENU_ITEM { command=EScreenGrabberCmdSettings; txt=STRING_r_sg_command4; },
-        MENU_ITEM { command=EScreenGrabberCmdAbout; txt=STRING_r_sg_command5; },
-        MENU_ITEM { command=EAknCmdExit; txt=STRING_r_sg_command6; }
+        MENU_ITEM { command=EScreenGrabberCmdSavedShots; txt=STRING_r_sg_command4; },
+        MENU_ITEM { command=EScreenGrabberCmdSettings; txt=STRING_r_sg_command5; },
+        MENU_ITEM { command=EScreenGrabberCmdAbout; txt=STRING_r_sg_command6; },
+        MENU_ITEM { command=EAknCmdExit; txt=STRING_r_sg_command7; }
         };
     }
 
@@ -209,10 +210,95 @@ RESOURCE MENU_PANE r_screengrabber_view2_menu
     {
     items=
         {
-        MENU_ITEM { command=EScreenGrabberCmdSettingsChange; txt=STRING_r_sg_command7; },
-        MENU_ITEM { command=EScreenGrabberCmdSettingsExit; txt=STRING_r_sg_command6; }
+        MENU_ITEM { command=EScreenGrabberCmdSettingsChange; txt=STRING_r_sg_command8; },
+        MENU_ITEM { command=EScreenGrabberCmdSettingsExit; txt=STRING_r_sg_command7; }
         };
     }
+
+
+
+//----------------------------------------------------
+//   
+//    r_screengrabber_view3
+//
+//----------------------------------------------------
+//
+
+RESOURCE CBA r_screengrabber_softkeys_view3
+{
+    buttons = {
+	    CBA_BUTTON {id=EAknSoftkeyOptions; txt = STRING_r_sg_cba1;},
+	    CBA_BUTTON {id=EAknSoftkeyBack; txt = STRING_r_sg_cba2; }
+    };
+}
+
+   
+RESOURCE AVKON_VIEW r_screengrabber_view3
+    {
+    hotkeys=r_screengrabber_hotkeys;
+    menubar=r_screengrabber_menubar_view3;  
+    cba=r_screengrabber_softkeys_view3;
+    }
+
+//----------------------------------------------------
+//   
+//    r_screengrabber_menubar_view3
+//
+//----------------------------------------------------
+//
+    
+
+RESOURCE MENU_BAR r_screengrabber_menubar_view3
+    {
+    titles=
+        {
+        MENU_TITLE { menu_pane=r_screengrabber_app_menu; txt="App"; },
+        MENU_TITLE { menu_pane=r_screengrabber_view3_menu; txt="View"; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_screengrabber_view3_menu
+//
+//----------------------------------------------------
+//
+
+
+
+RESOURCE MENU_PANE r_screengrabber_view3_menu
+    {
+    items=
+    {
+	MENU_ITEM { command=EScreenGrabberCmdDeleteShot; txt=STRING_r_sg_command9; },
+        MENU_ITEM { command=EScreenGrabberCmdSendShot; txt=STRING_r_sg_command10; }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_screengrabber_view4 (AboutView)
+//
+//----------------------------------------------------
+//
+
+RESOURCE CBA r_screengrabber_softkeys_view4
+{
+    buttons = {
+	    CBA_BUTTON {id=EAknSoftkeyOptions; txt = STRING_r_sg_cba1;},
+	    CBA_BUTTON {id=EAknSoftkeyBack; txt = STRING_r_sg_cba2; }
+    };
+}
+
+   
+RESOURCE AVKON_VIEW r_screengrabber_view4
+    {
+    hotkeys=r_screengrabber_hotkeys;
+    menubar=r_screengrabber_app_menu;  
+    cba=r_screengrabber_softkeys_view4;
+    }
+
 
 //----------------------------------------------------
 //   
@@ -461,7 +547,9 @@ RESOURCE ARRAY r_videoformatselection_text_array
 		{
 		AVKON_ENUMERATED_TEXT { value=EVideoFormatAnimatedGIF; text = STRING_r_sg_arr5_item1; },
 		AVKON_ENUMERATED_TEXT { value=EVideoFormatAnimatedGIFHQ; text = STRING_r_sg_arr5_item2; }
-
+#ifdef WITH_MP4VIDEO_SUPPORT
+		,AVKON_ENUMERATED_TEXT { value=EVideoFormatMP4; text = STRING_r_sg_arr5_item3; }
+#endif
 		};
 	}
 
@@ -628,6 +716,7 @@ RESOURCE TBUF r_settings_title
     buf = qtn_settings_caption_string;
 }
 
+
 RESOURCE TBUF r_savepathselection_dialog_title
 {
     buf = STRING_r_dlg3_label;
@@ -661,6 +750,11 @@ RESOURCE TBUF r_saved_query_prompt3
 RESOURCE TBUF r_restart_confirmation_query_prompt
 {
     buf = STRING_r_dlg7_prompt;
+}
+
+RESOURCE TBUF r_delshot_query_prompt
+{
+    buf = STRING_r_dlg8_prompt;
 }
 
 

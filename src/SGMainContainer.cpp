@@ -30,6 +30,7 @@
 #include <akntitle.h>
 #include <eikspane.h>  
 #include <AknDef.h>
+#include <eikgted.h>
 #include <ScreenGrabber2.rsg>
 
 const TUint KLeftMargin = 2;
@@ -45,54 +46,39 @@ void CScreenGrabberMainContainer::ConstructL(const TRect& aRect)
 
     CreateWindowL();
     Window().SetShadowDisabled(EFalse);
+
+    EnableDragEvents();
+
+    iTextView = new (ELeave) CEikGlobalTextEditor;
+    iTextView->SetAknEditorFlags( EAknEditorFlagEnableScrollBars);
+    iTextView->ConstructL(
+        this,
+        0,  // number of lines
+        0,  // text limit
+        (EEikEdwinReadOnly | EEikEdwinNoAutoSelection | CEikEdwin::EAvkonDisableCursor), // edwin flags
+        EGulFontControlAll, // font control flags
+        EGulAllFonts ); // font name flags
     
+    iTextView->SetFocus(ETrue);
+
     SetBlank();
     
     // set title of the app
     CEikStatusPane* statusPane = iEikonEnv->AppUiFactory()->StatusPane();
     CAknTitlePane* title = static_cast<CAknTitlePane*>( statusPane->ControlL( TUid::Uid( EEikStatusPaneUidTitle ) ) );
     title->SetTextL( _L("Screen Grabber") );
-
-    //iText = HBufC::NewL(200000);    
-    iText = iCoeEnv->AllocReadResourceL(R_USAGE_TEXT); 
-    iCurrentLine = 0;
-    iLineCount = 0;
-    iNumberOfLinesFitsScreen = 0;
-    iX_factor = 1;
-    iY_factor = 1;
-    iLeftDrawingPosition = KLeftMargin;
-
-    // get font
-    iFont = AknLayoutUtils::FontFromId(EAknLogicalFontSecondaryFont);
-
-    iWrappedArray = new(ELeave) CArrayFixFlat<TPtrC>(500);
-    
+   
+    iText = iCoeEnv->AllocReadResourceL(R_USAGE_TEXT);    
     SetRect(aRect);
     ActivateL(); 
-
-    //PrintText(_L(""));
-    UpdateVisualContentL(EFalse);  // do not automatically scroll to the bottom
+    UpdateVisualContentL();
     }
 
 CScreenGrabberMainContainer::~CScreenGrabberMainContainer()
     {
-    if (iSkinContext)
-    	delete iSkinContext;
-    
-	if (iWrappedArray)
-		{
-    	iWrappedArray->Reset();
-    	delete iWrappedArray;
-		}
-
-	if (iText)
-    	delete iText;
-
-    if (iScrollBarFrame)
-        delete iScrollBarFrame;
-
-    if (iWrapperString)
-        delete iWrapperString;
+    if (iSkinContext) delete iSkinContext;
+    if (iText) delete iText;
+    if (iTextView) delete iTextView;
     }
 
 
@@ -100,7 +86,7 @@ CScreenGrabberMainContainer::~CScreenGrabberMainContainer()
 // CScreenGrabberMainContainer::UpdateVisualContentL()
 // ---------------------------------------------------------
 //
-void CScreenGrabberMainContainer::UpdateVisualContentL(TBool aScrollToBottom)
+void CScreenGrabberMainContainer::UpdateVisualContentL()
     {
     TSize rectSize;
     AknLayoutUtils::LayoutMetricsSize(AknLayoutUtils::EMainPane, rectSize);
@@ -111,255 +97,62 @@ void CScreenGrabberMainContainer::UpdateVisualContentL(TBool aScrollToBottom)
         {
         delete iSkinContext;
         iSkinContext = NULL;
-        }  
-    iSkinContext = CAknsBasicBackgroundControlContext::NewL(KAknsIIDQsnBgAreaMain, rectSize, EFalse);
-
-    // init scroll bar if not yet done
-    if (!iScrollBarFrame)
-        {
-        iScrollBarFrame = new(ELeave) CEikScrollBarFrame(this, this, ETrue);
-
-        CAknAppUi* appUi = iAvkonAppUi;
-        
-	    if (AknLayoutUtils::DefaultScrollBarType(appUi) == CEikScrollBarFrame::EDoubleSpan)
-	        {
-		    iScrollBarFrame->CreateDoubleSpanScrollBarsL(ETrue, EFalse);            
-		    iScrollBarFrame->SetTypeOfVScrollBar(CEikScrollBarFrame::EDoubleSpan);
-	        }
-	    else
-	        {
-		    iScrollBarFrame->SetTypeOfVScrollBar(CEikScrollBarFrame::EArrowHead);
-	        }  
-	    iScrollBarFrame->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto);
-        }
-
-    // drawing positions, needed for scalable ui
-    iX_factor = TReal(rect.Width()) / 176;
-    iY_factor = TReal(rect.Height()) / 144;
-
-    iWrappedArray->Reset();
-
-    if (iWrapperString)
-        {
-        delete iWrapperString;
-        iWrapperString = NULL;
-        }
-
-    // define drawing width, some extra space needed if using double span scrolling bar
-    TUint drawingWidth(0);
-    if (iScrollBarFrame->TypeOfVScrollBar() == CEikScrollBarFrame::EDoubleSpan)
-        {
-        if (AknLayoutUtils::LayoutMirrored())  // scroll bar on 'left'
-            {
-            iLeftDrawingPosition = KLeftMargin + 12;
-            drawingWidth = TInt( rect.Width() - iLeftDrawingPosition*iX_factor - (KRightMargin*iX_factor)); 
-            }
-        else // scroll bar on 'right'
-            {
-            iLeftDrawingPosition = KLeftMargin;  
-            drawingWidth = TInt( rect.Width() - iLeftDrawingPosition*iX_factor - (KRightMargin*iX_factor + 7*iX_factor)); 
-            }        
-        }
-    else
-        drawingWidth = TInt( rect.Width() - KLeftMargin*iX_factor - KRightMargin*iX_factor);
-
-    // wrap the text
-    iWrapperString = AknBidiTextUtils::ConvertToVisualAndWrapToArrayL(
-        iText->Des(),
-        drawingWidth,
-        *iFont,
-        *iWrappedArray
-        );
+        } 
     
-    iLineCount = iWrappedArray->Count();
+ 
+    iSkinContext = CAknsBasicBackgroundControlContext::NewL(KAknsIIDQsnBgAreaMain, rectSize, EFalse);
+    iTextView->SetSkinBackgroundControlContextL(iSkinContext);
+    TCharFormat charFormat;
+    TCharFormatMask charMask;
 
-    // count amount of lines fits to screen
-    iNumberOfLinesFitsScreen = TInt(rect.Height() / (iFont->HeightInPixels()));
+    // get the text color from the skin   
+    TRgb textColor;
+    if (AknsUtils::GetCachedColor(AknsUtils::SkinInstance(), textColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 ) == KErrNone)
+    {
+	charMask.SetAttrib(EAttColor);
+	charMask.SetAttrib(EAttFontHeight);
+	charMask.SetAttrib(EAttFontPosture); 
+	charMask.SetAttrib(EAttFontStrokeWeight); 
+	charMask.SetAttrib(EAttFontPrintPos);  
+	charMask.SetAttrib(EAttFontTypeface); 
+	const CFont* font = AknLayoutUtils::FontFromId(EAknLogicalFontSecondaryFont);
+	charFormat.iFontSpec = font->FontSpecInTwips();
+	charFormat.iFontPresentation.iTextColor = textColor;
+	iTextView->ApplyCharFormatL(charFormat, charMask);
+    }
 
-    // check if needed to scroll to the bottom
-    if (aScrollToBottom && iCurrentLine < iLineCount - iNumberOfLinesFitsScreen)
-        {
-        iCurrentLine = iLineCount-iNumberOfLinesFitsScreen;
-        }
-
-    // update the scroll bars
-	TEikScrollBarModel horizontalBar;
-    TEikScrollBarModel verticalBar;
-    verticalBar.iThumbPosition = iCurrentLine;
-    verticalBar.iScrollSpan = iLineCount - iNumberOfLinesFitsScreen + 1;
-    verticalBar.iThumbSpan = 1;
-
-    TEikScrollBarFrameLayout layout;
-	layout.iTilingMode = TEikScrollBarFrameLayout::EInclusiveRectConstant;
-
-    if (iScrollBarFrame->TypeOfVScrollBar() == CEikScrollBarFrame::EDoubleSpan)
-        {    
-        // do not let scrollbar values overflow
-        if (verticalBar.iThumbPosition + verticalBar.iThumbSpan > verticalBar.iScrollSpan)
-            verticalBar.iThumbPosition = verticalBar.iScrollSpan - verticalBar.iThumbSpan;
-		
-        TAknDoubleSpanScrollBarModel horizontalDSBar(horizontalBar);
-        TAknDoubleSpanScrollBarModel verticalDSBar(verticalBar);
-       
-        iScrollBarFrame->TileL(&horizontalDSBar, &verticalDSBar, rect, rect, layout);        
-        iScrollBarFrame->SetVFocusPosToThumbPos(verticalDSBar.FocusPosition());
-	    }  
-	else
-	    {
-		iScrollBarFrame->TileL( &horizontalBar, &verticalBar, rect, rect, layout );
-		iScrollBarFrame->SetVFocusPosToThumbPos( verticalBar.iThumbPosition );
-	    }
-
-
+    iTextView->SetTextL(&(*iText));
     // update the screen
     DrawNow();
     }
 
-// ---------------------------------------------------------
-// CScreenGrabberMainContainer::Draw(const TRect& aRect) const
-// ---------------------------------------------------------
-//
-void CScreenGrabberMainContainer::Draw(const TRect& aRect) const
+TInt CScreenGrabberMainContainer::CountComponentControls() const
     {
-    CWindowGc& gc = SystemGc();
-
-    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-    if (iSkinContext)
-	    {
-        // draws the skin background
-	    AknsDrawUtils::Background(skin, iSkinContext, this, gc, aRect);
-	    }
-    else
-        {
-        gc.Clear(aRect);
-        }
-
-
-    // get the text color from the skin   
-    TRgb skinPenColor;
-    if (AknsUtils::GetCachedColor( skin, skinPenColor, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 ) == KErrNone)
-        {
-		gc.SetPenColor(skinPenColor);
-		}	
-    else
-        {
-        gc.SetPenColor(KRgbBlack);
-        }
-
-    gc.UseFont(iFont);
-
-    // draw the text
-    for (TInt i=0; i<iNumberOfLinesFitsScreen; i++)
-        {
-        // index out of bounds check and then draw text
-        if (i+iCurrentLine < iWrappedArray->Count())
-            gc.DrawText(iWrappedArray->At(i+iCurrentLine), TPoint(TInt(iLeftDrawingPosition*iX_factor), TInt(iFont->HeightInPixels()*(i+1))));
-        }
-
-    gc.DiscardFont();
+    return (iTextView ? 1 : 0); // return number of controls inside this container
     }
 
-// ---------------------------------------------------------
-// CScreenGrabberMainContainer::HandleControlEventL(
-//     CCoeControl* aControl,TCoeEvent aEventType)
-// ---------------------------------------------------------
-//
-void CScreenGrabberMainContainer::HandleControlEventL(
-    CCoeControl* /*aControl*/,TCoeEvent /*aEventType*/)
+CCoeControl* CScreenGrabberMainContainer::ComponentControl(TInt aIndex) const
     {
+    switch (aIndex)
+        {
+        case 0:
+            return iTextView;
+        default:
+            return NULL;
+        }
     }
 
-// ---------------------------------------------------------
-// CScreenGrabberMainContainer::PrintText(const TDesC& aDes)
-// Print text into output window.
-// ---------------------------------------------------------
-//
-void CScreenGrabberMainContainer::PrintText(const TDesC& aDes)
+void CScreenGrabberMainContainer::SizeChanged()
     {
-    iText->Des().Append( aDes );
-    UpdateVisualContentL(EFalse);  // do not automatically scroll to the bottom
-    }
-
-// ---------------------------------------------------------
-// CScreenGrabberMainContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent,
-//                                    TEventCode aType)
-// Handle key event. Only up and down key arrow events are
-// consumed in order to enable scrolling in output window.
-// ---------------------------------------------------------
-//
-TKeyResponse CScreenGrabberMainContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType)
-    {
-    if(aType != EEventKey)
-        return EKeyWasNotConsumed;
     
-    if(aKeyEvent.iCode == EKeyUpArrow)
+    if (!iTextView) return;
+    TSize size = Size();
+
+    if (iTextView->ScrollBarFrame())
         {
-        if (iCurrentLine > 0)
-            {
-            iCurrentLine--;
-            UpdateVisualContentL(EFalse);
-            }
-
-        return EKeyWasConsumed;
+        size.iWidth -= iTextView->ScrollBarFrame()->VerticalScrollBar()->ScrollBarBreadth();
         }
-    
-    else if(aKeyEvent.iCode == EKeyDownArrow)
-        {
-        if (iCurrentLine < iLineCount - iNumberOfLinesFitsScreen)
-            {
-            iCurrentLine++;
-            UpdateVisualContentL(EFalse);
-            }
-
-        return EKeyWasConsumed;
-        }
-    
-    return EKeyWasNotConsumed;
-    }
-
-
-// ---------------------------------------------------------
-// CScreenGrabberMainContainer::ClearOutputWindow()
-// Clear the output window.
-// ---------------------------------------------------------
-//
-void CScreenGrabberMainContainer::ClearOutputWindow()
-    {
-    iText->Des() = _L("");
-    UpdateVisualContentL(ETrue);
-    }
-
-
-// ---------------------------------------------------------
-// CScreenGrabberMainContainer::HandleResourceChange(TInt aType)
-// Handle layout change of the screen
-// ---------------------------------------------------------
-//
-void CScreenGrabberMainContainer::HandleResourceChange(TInt aType)
-    {
-    if (aType == KEikDynamicLayoutVariantSwitch || aType == KAknsMessageSkinChange)
-        {
-        TRect mainPaneRect;
-        AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EMainPane, mainPaneRect);
-        SetRect(mainPaneRect);
-
-        iCurrentLine = 0; // scroll to top
-
-        // update font
-        iFont = AknLayoutUtils::FontFromId(EAknLogicalFontSecondaryFont);
-
-        // delete the scroll and update screen
-        if (iScrollBarFrame)
-            {
-            delete iScrollBarFrame;
-            iScrollBarFrame = NULL;
-            }
-        UpdateVisualContentL(EFalse);
-        }
-    else
-        {
-        CCoeControl::HandleResourceChange(aType);
-        }
+    iTextView->SetExtent(TPoint(0,0), size);
     }
 
 // ---------------------------------------------------------
@@ -379,33 +172,85 @@ TTypeUid::Ptr CScreenGrabberMainContainer::MopSupplyObject(TTypeUid aId)
 
 
 // ---------------------------------------------------------
-// CScreenGrabberMainContainer::HandleScrollEventL()
-// Capture touch events on the scroll bar
+// CScreenGrabberMainContainer::HandleControlEventL(
+//     CCoeControl* aControl,TCoeEvent aEventType)
 // ---------------------------------------------------------
 //
-void CScreenGrabberMainContainer::HandleScrollEventL(CEikScrollBar* aScrollBar, TEikScrollEvent aEventType)
+void CScreenGrabberMainContainer::HandleControlEventL(
+    CCoeControl* /*aControl*/,TCoeEvent /*aEventType*/)
     {
-    // only on page up/down,scroll up/down and drag events
-    if ((aEventType == EEikScrollPageDown) || (aEventType == EEikScrollPageUp) || 
-       (aEventType == EEikScrollThumbDragVert) || (aEventType == EEikScrollUp) ||
-       (aEventType == EEikScrollDown))
+    }
+
+// ---------------------------------------------------------
+// CScreenGrabberMainContainer::HandleResourceChange(TInt aType)
+// Handle layout change of the screen
+// ---------------------------------------------------------
+//
+void CScreenGrabberMainContainer::HandleResourceChange(TInt aType)
+    {
+    if (aType == KEikDynamicLayoutVariantSwitch || aType == KAknsMessageSkinChange)
         {
-        // get the current position from the scroll bar
-        iCurrentLine = aScrollBar->ThumbPosition();
-        
-        // refresh now
-        UpdateVisualContentL(EFalse);
+        TRect mainPaneRect;
+        AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EMainPane, mainPaneRect);
+        SetRect(mainPaneRect);
+        UpdateVisualContentL();
+        }
+    else
+        {
+        CCoeControl::HandleResourceChange(aType);
         }
     }
 
+
+// ---------------------------------------------------------
+// CScreenGrabberMainContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent,
+//                                    TEventCode aType)
+// Handle key event. Only up and down key arrow events are
+// consumed in order to enable scrolling in output window.
+// ---------------------------------------------------------
+//
+
+TKeyResponse CScreenGrabberMainContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent,TEventCode aType)
+    {
+
+
+    if (iTextView  && aType == EEventKey) {
+	
+	if(aKeyEvent.iCode == EKeyUpArrow)
+        {
+	    iTextView->MoveDisplayL(TCursorPosition::EFLineUp);
+	    return EKeyWasConsumed;
+        }
+
+	else if(aKeyEvent.iCode == EKeyDownArrow)
+        {
+	    iTextView->MoveDisplayL(TCursorPosition::EFLineDown);
+	    return EKeyWasConsumed;
+        }
+    }
+    return EKeyWasNotConsumed;
+    }
+
+
+
 void CScreenGrabberMainContainer::HandlePointerEventL(const TPointerEvent &aPointerEvent)
 {
-    CCoeControl::HandlePointerEventL(aPointerEvent);
-    if (iScrollBarFrame){
-	CEikScrollBar* horizontalBar = iScrollBarFrame->GetScrollBarHandle(CEikScrollBar::EVertical);
-	if (horizontalBar) horizontalBar->HandlePointerEventL(aPointerEvent);
-	CEikScrollBar* verticalBar = iScrollBarFrame->GetScrollBarHandle(CEikScrollBar::EHorizontal);
-	if (verticalBar) verticalBar->HandlePointerEventL(aPointerEvent);
+    if (iTextView)
+    {
+	static TInt oldY = 0;
+	TInt currY = aPointerEvent.iPosition.iY;
+	TCursorPosition::TMovementType move = TCursorPosition::EFLineUp;  
+
+	if (currY != oldY )
+	{
+	    move = currY > oldY ? TCursorPosition::EFLineUp : TCursorPosition::EFLineDown;
+	    oldY = currY;
+	}
+
+	if (aPointerEvent.iType == TPointerEvent::EDrag)
+	{
+	    iTextView->MoveDisplayL(move);
+	}
     }
 }
 

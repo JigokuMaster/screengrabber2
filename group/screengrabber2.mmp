@@ -18,17 +18,21 @@
 
 //#include <data_caging_paths.hrh>
 //#include <platform_paths.hrh>
+#include "screengrabber2.mmh"
 
 
 TARGET            ScreenGrabber2.exe
 TARGETTYPE        exe
-EPOCSTACKSIZE     0x5000
-EPOCHEAPSIZE      0x20000 0x1000000  // Min 128Kb, Max 16Mb
-
+EPOCSTACKSIZE     0x14000
+#ifdef USE_OPENC
+EPOCHEAPSIZE 0x20000 252000000 //  241MB maxminum
+#else 
+EPOCHEAPSIZE      0x20000 0x4000000  // Min 128Kb, Max 16Mb
+#endif
 UID               0x100039CE 0xdbee45c2
 
-VENDORID          0//VID_DEFAULT
-CAPABILITY        ReadDeviceData WriteDeviceData SwEvent
+VENDORID          0
+CAPABILITY        ReadDeviceData WriteDeviceData SwEvent LocalServices NetworkServices ReadUserData WriteUserData
 
 //SMPSAFE
 
@@ -48,8 +52,16 @@ END
 
 //APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE	 /epoc32/include
-SYSTEMINCLUDE	 /epoc32/include/libc
 SYSTEMINCLUDE	 ../inc/internal
+
+#ifdef USE_OPENC
+SYSTEMINCLUDE	 /epoc32/include/stdapis
+MACRO WITH_MP4VIDEO_SUPPORT
+MACRO ENABLE_DEBUG 
+#else
+SYSTEMINCLUDE	 /epoc32/include/libc
+SYSTEMINCLUDE	 ../inc/estlib
+#endif
 
 USERINCLUDE       ../inc
 SOURCEPATH        ../src
@@ -62,9 +74,16 @@ SOURCE            SGMainView.cpp
 SOURCE            SGMainContainer.cpp 
 SOURCE            SGSettingListView.cpp
 SOURCE            SGSettingListContainer.cpp
+SOURCE            SGSavedShotsView.cpp
+SOURCE            SGSavedShotsContainer.cpp
+SOURCE		  SGAboutView.cpp
 SOURCE            SGModel.cpp
 SOURCE            SGGifAnimator.cpp
 SOURCE            SGNewFormats.cpp
+
+#ifdef USE_OPENC
+SOURCE            VideoEnc.cpp
+#endif 
 
 LIBRARY           euser.lib
 LIBRARY           apparc.lib
@@ -90,8 +109,20 @@ LIBRARY           eikctl.lib
 LIBRARY           eikdlg.lib
 LIBRARY           eikcdlg.lib
 LIBRARY           egul.lib aknicon.lib
+LIBRARY           etext.lib form.lib
 LIBRARY           hal.lib
+LIBRARY           commonui.lib apmime.lib sendui.lib
+LIBRARY		  browserengine.lib
+
+#ifdef USE_OPENC
+LIBRARY           libc.lib libm.lib
+STATICLIBRARY	  libx264.lib
+STATICLIBRARY	  liblsmash.lib
+LIBRARY           charconv.lib
+
+#else
 LIBRARY           estlib.lib
+#endif
 
 // Multidrive support
 //#if(!defined __SERIES60_30__ && !defined __SERIES60_31__)
@@ -100,5 +131,7 @@ LIBRARY           estlib.lib
 
 // Screen resolution change support
 MACRO SCREENGRABBER_SCREEN_RESOLUTION_CHANGE_SUPPORT
+
+
 //MACRO SYMBIAN_WSERV_AND_CONE_MULTIPLE_SCREENS
 // End of File

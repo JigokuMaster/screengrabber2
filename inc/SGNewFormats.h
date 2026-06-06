@@ -5,7 +5,7 @@
 #include <e32base.h>
 #include <fbs.h>
 #include <f32file.h>
-#include <stdint.h>
+#include <stddef.h>
 #include "SGGifAnimator.h"
 
 #ifndef MSF_GIF_IMPL
@@ -40,6 +40,41 @@ private:
     TBool        		iCancelEncoding;
     CSavingProgressDialog*      iSavingProgressDialog;
     };
+
+
+#ifdef WITH_MP4VIDEO_SUPPORT
+#include "VideoEnc.h"
+
+class CMP4Exporter : public CBase, public MDialogCallback
+	{
+public:
+
+    static int Create(const TDesC& aFileName, TSize aDimensions, CVideoFrameArray* aVideoFrameArray);
+    ~CMP4Exporter();
+
+private:
+    CMP4Exporter();
+
+    void StartL(const TDesC& aFileName, const TSize& aDimensions, CVideoFrameArray* aVideoFrameArray);
+
+    CFbsBitmap* GetBitmapLC(TVideoFrame& aFrame, const TSize& aDimensions);
+
+    TBool EncodeFrameL(CFbsBitmap* aBitmap, TUint aDelay);
+
+    void ShowErrorL();
+
+    void DialogDismissedL(TInt aButtonId); // from MDialogCallback
+    
+private:
+    MP4Encoder*			iMP4Encoder;
+    RFs                         iFs;
+    TBool        		iCancelEncoding;
+    CSavingProgressDialog*      iSavingProgressDialog;
+    };
+
+
+
+#endif // WITH_MP4VIDEO_SUPPORT
 
 
 #endif // __SCREENGRABBER_NEWFORMATS_H__

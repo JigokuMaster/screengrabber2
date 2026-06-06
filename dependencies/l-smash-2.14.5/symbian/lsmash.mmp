@@ -1,0 +1,70 @@
+
+TARGET			liblsmash.lib
+TARGETTYPE		lib
+
+
+USERINCLUDE .. ../common ../codecs ../importer ../core
+
+
+SYSTEMINCLUDE /epoc32/include /epoc32/include/stdapis
+
+
+SOURCEPATH ../common
+
+SOURCE alloc.c
+SOURCE bits.c
+SOURCE bytes.c
+SOURCE list.c
+SOURCE multibuf.c
+SOURCE osdep.c
+SOURCE utils.c
+
+
+SOURCEPATH ../codecs
+
+SOURCE a52.c
+SOURCE alac.c
+SOURCE description.c
+SOURCE dts.c
+SOURCE h264.c
+SOURCE hevc.c
+SOURCE id.c
+SOURCE mp4sys.c
+SOURCE mp4a.c
+SOURCE mp4v.c
+SOURCE nalu.c
+SOURCE qt_wfex.c
+SOURCE vc1.c
+SOURCE wma.c
+
+SOURCEPATH ../importer
+
+SOURCE a52_imp.c
+SOURCE adts_imp.c
+SOURCE als_imp.c
+SOURCE amr_imp.c
+SOURCE dts_imp.c
+SOURCE importer.c
+SOURCE isobm_imp.c
+SOURCE mp3_imp.c
+SOURCE nalu_imp.c
+SOURCE vc1_imp.c
+SOURCE wave_imp.c
+
+SOURCEPATH ../core
+
+SOURCE box.c
+SOURCE box_default.c
+SOURCE box_type.c
+SOURCE chapter.c
+SOURCE file.c 
+SOURCE fragment.c
+SOURCE isom.c
+SOURCE meta.c
+SOURCE print.c
+SOURCE read.c
+SOURCE summary.c 
+SOURCE timeline.c 
+SOURCE write.c
+
+OPTION GCCE -std=c99

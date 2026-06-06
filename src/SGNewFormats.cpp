@@ -259,3 +259,178 @@ void CGifHQAnimator::DialogDismissedL(TInt aButtonId)
         }
     }
 
+
+#ifdef WITH_MP4VIDEO_SUPPORT
+
+#include <utf.h> // CnvUtfConverter
+
+// ---------------------------------------------------------------------------
+// CMP4Exporter
+//
+TInt CMP4Exporter::Create(const TDesC& aFileName, TSize aDimensions, CVideoFrameArray* aVideoFrameArray)
+    {
+	CMP4Exporter* self = new(ELeave) CMP4Exporter;
+	CleanupStack::PushL(self);
+	TRAPD(err, self->StartL(aFileName, aDimensions, aVideoFrameArray));
+	CleanupStack::PopAndDestroy();
+	return err;
+    }
+
+// ---------------------------------------------------------------------------
+
+CMP4Exporter::CMP4Exporter():iMP4Encoder(NULL), iCancelEncoding(EFalse)
+    {
+    }
+
+// ---------------------------------------------------------------------------
+
+CMP4Exporter::~CMP4Exporter()
+    {
+    if ( iMP4Encoder ){
+	delete iMP4Encoder;
+	iMP4Encoder = NULL;
+    }
+    delete iSavingProgressDialog;
+    }
+ 
+
+// ---------------------------------------------------------------------------
+
+void CMP4Exporter::StartL(const TDesC& aFileName, const TSize& aDimensions, CVideoFrameArray* aVideoFrameArray)
+    {
+    __ASSERT_ALWAYS(aFileName.Length() > 0, User::Panic(_L("MP4Enc"), 100));
+    __ASSERT_ALWAYS(aDimensions.iHeight > 0, User::Panic(_L("MP4Enc"), 101));
+    __ASSERT_ALWAYS(aDimensions.iWidth > 0, User::Panic(_L("MP4Enc"), 102));
+    __ASSERT_ALWAYS(aVideoFrameArray != NULL, User::Panic(_L("MP4Enc"), 103));
+    
+
+
+    TInt width = aDimensions.iWidth, height = aDimensions.iHeight;
+    if ( (width%2) != 0 || (height%2) != 0 )
+    {
+	User::Leave(KErrNotSupported);
+    }    
+
+    User::LeaveIfError(iFs.Connect());
+
+    // setup MP4 encoder
+    iMP4Encoder = new MP4Encoder();
+    if (!iMP4Encoder) 
+    {
+	User::Leave(KErrNoMemory);
+    }
+
+    
+    HBufC8* utf8Buf = HBufC8::NewL(KMaxFileName+2);
+    CleanupStack::PushL(utf8Buf);
+    TPtr8 fp = utf8Buf->Des();
+    User::LeaveIfError(CnvUtfConverter::ConvertFromUnicodeToUtf8(fp, aFileName));
+    TInt ret = iMP4Encoder->init(width, height, (const char*)fp.PtrZ());
+    CleanupStack::PopAndDestroy(utf8Buf);
+
+    if ( !ret ) 
+    {
+	ShowErrorL();
+	return;
+    }
+
+
+    // show a progress dialog
+    iSavingProgressDialog = CSavingProgressDialog::NewL(this);
+    iSavingProgressDialog->StartDisplayingL(aVideoFrameArray->Count()-1);
+
+    TBool ok = EFalse;
+    for (TInt i=0; !iCancelEncoding && i<aVideoFrameArray->Count(); i++)
+        {
+	    
+        TVideoFrame frame = aVideoFrameArray->At(i);
+        CFbsBitmap* bitmap = GetBitmapLC(frame, aDimensions);
+ 	ok = EncodeFrameL(bitmap, frame.iDelay);
+        CleanupStack::PopAndDestroy(); //bitmap
+        // update the progress bar
+        iSavingProgressDialog->IncreaseProgressValueWithOne();
+        if (!ok) break;
+
+        }
+    
+    iFs.Close();
+
+    if (ok) ok = iMP4Encoder->flushFrames() > 0;
+
+    // remove the progress dialog from the screen
+    iSavingProgressDialog->ProcessFinished();
+    if (!ok) ShowErrorL();
+
+    }    
+
+
+// ---------------------------------------------------------------------------
+
+CFbsBitmap* CMP4Exporter::GetBitmapLC(TVideoFrame& aFrame, const TSize& aDimensions)
+    {
+    CFbsBitmap* bitmap = new(ELeave) CFbsBitmap;
+    CleanupStack::PushL(bitmap);
+    
+    // read the bitmap from the temporary file
+    RFile bitmapFile;
+    User::LeaveIfError( bitmapFile.Open(iFs, aFrame.iFileStorePath, EFileRead) );
+    RFileReadStream readStream(bitmapFile);
+    bitmap->InternalizeL(readStream);
+    readStream.Close();
+    bitmapFile.Close();
+
+    // delete the temporary file since it's not needed anymore
+    iFs.Delete(aFrame.iFileStorePath);
+    
+    // resize the bitmap to match the video dimensions if it is a full screen one
+    if (aFrame.iFillsWholeScreen && (aFrame.iWidth != aDimensions.iWidth || aFrame.iHeight != aDimensions.iHeight))
+        {
+        if (bitmap->Resize(aDimensions) == KErrNone)
+            {
+            // also update dimensions of this frame to match the dimensions of the video            
+            aFrame.iWidth = aDimensions.iWidth;
+            aFrame.iHeight = aDimensions.iHeight;
+            }
+        }
+    
+    return bitmap;
+    }
+ 
+TBool CMP4Exporter::EncodeFrameL(CFbsBitmap* aBitmap, TUint aDelay)
+{
+    TInt bpp = TDisplayModeUtils::NumDisplayModeBitsPerPixel(aBitmap->DisplayMode());   
+    if (bpp < 24) 
+    {
+	User::Leave(KErrNotSupported);
+    }
+    
+    TInt stride = aBitmap->DataStride();
+    aBitmap->LockHeap();
+    uint8_t* data = (uint8_t*)aBitmap->DataAddress(); 
+    TBool ok = iMP4Encoder->encodeFrame(data, bpp/8, stride, aDelay*10) > 0;
+    aBitmap->UnlockHeap();
+    return ok;
+}
+
+   
+// ---------------------------------------------------------------------------
+
+void CMP4Exporter::ShowErrorL()
+    {
+	User::Leave(KErrCorrupt);
+
+    }
+
+// ---------------------------------------------------------------------------
+
+void CMP4Exporter::DialogDismissedL(TInt aButtonId)
+    {
+    // check if cancel button was pressed
+    if (aButtonId == EAknSoftkeyCancel)
+        {
+	    iCancelEncoding = ETrue;
+        }
+    }
+
+#endif // WITH_MP4VIDEO_SUPPORT
+

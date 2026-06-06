@@ -25,11 +25,13 @@ rls_string STRING_r_sg_command2 "Language"
 
 rls_string STRING_r_sg_command3 "Screen resolution"
 
-rls_string STRING_r_sg_command4 "Settings"
+rls_string STRING_r_sg_command4 "Saved shots"
 
-rls_string STRING_r_sg_command5 "About"
+rls_string STRING_r_sg_command5 "Settings"
 
-rls_string STRING_r_sg_command6 "Exit"
+rls_string STRING_r_sg_command6 "About"
+
+rls_string STRING_r_sg_command7 "Exit"
 
 // Language items
 rls_string STRING_r_sg_command2_item1 "English"
@@ -37,7 +39,11 @@ rls_string STRING_r_sg_command2_item2 "Turkish"
 rls_string STRING_r_sg_command2_item3 "Vietnamese"
 
 // used in settings menu
-rls_string STRING_r_sg_command7 "Change"
+rls_string STRING_r_sg_command8 "Change"
+
+// used in savedshots window menu
+rls_string STRING_r_sg_command9 "Delete"
+rls_string STRING_r_sg_command10 "Send"
 
 
 // strings for settings cba
@@ -127,6 +133,9 @@ rls_string STRING_r_sg_arr5_item1   "Animated GIF"
 
 rls_string STRING_r_sg_arr5_item2   "HQ Animated GIF"
 
+rls_string STRING_r_sg_arr5_item3   "MP4"
+
+
 // strings for dialog (Custom key)
 
 rls_string STRING_r_dlg1_label  "Press some key:" 
@@ -158,7 +167,12 @@ rls_string STRING_r_dlg6_prompt3 "Video saved to Media Gallery"
 
 // strings for (restart query)
 
-rls_string STRING_r_dlg7_prompt "Restart required to apply change, Exit now?"
+rls_string STRING_r_dlg7_prompt "Restart is required to apply the change, Exit now?"
+
+// strings for (Delete shot query)
+
+rls_string STRING_r_dlg8_prompt "Delete %U?"
+
 
 // usage text string 
 

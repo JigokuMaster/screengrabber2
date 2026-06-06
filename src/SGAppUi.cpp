@@ -21,11 +21,12 @@
 #include "SGAppUi.h"
 #include "SGMainView.h"
 #include "SGSettingListView.h"
+#include "SGSavedShotsView.h"
+#include "SGAboutView.h"
 #include <ScreenGrabber2.rsg>
 #include "SG.hrh"
 #include "SGModel.h"
 #include "SGDocument.h"
-
 #include <avkon.hrh>
 #include <AknQueryDialog.h>
 
@@ -58,6 +59,16 @@ void CScreenGrabberAppUi::ConstructL()
     view2->ConstructL();
     AddViewL( view2 );      // transfer ownership to CAknViewAppUi
     CleanupStack::Pop();    // view2
+
+    CSGSavedShotsView* view3 = new (ELeave) CSGSavedShotsView;
+
+    CleanupStack::PushL( view3 );
+    view3->ConstructL();
+    AddViewL( view3 );      // transfer ownership to CAknViewAppUi
+    CleanupStack::Pop();    // view3
+
+    CSGAboutView* view4 =  CSGAboutView::NewL();
+    AddViewL( view4 );      // transfer ownership to CAknViewAppUi
 
     SetDefaultViewL(*view1);
 

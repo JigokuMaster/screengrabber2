@@ -58,6 +58,7 @@ class CScreenGrabberAppUi : public CAknViewAppUi
     private: // New functions
 
 	TInt CurrentLanguageItemL();
+
 	void ChangeLanguageL(TInt aCommand);
 
     public: // Functions from base classes

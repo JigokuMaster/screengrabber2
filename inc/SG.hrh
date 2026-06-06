@@ -23,6 +23,7 @@
 enum TScreenGrabberCommandIds
 {
     EScreenGrabberCmdSendToBackground = 1,
+    EScreenGrabberCmdSavedShots,
     EScreenGrabberCmdSettings,
     EScreenGrabberCmdAbout,
     EScreenGrabberCmdChangeLanguage,
@@ -42,6 +43,8 @@ enum TScreenGrabberCommandIds
     EScreenGrabberCmdScreenResolutionItem10,
     EScreenGrabberCmdScreenResolutionItem11,
     EScreenGrabberCmdScreenResolutionItem12,
+    EScreenGrabberCmdDeleteShot,
+    EScreenGrabberCmdSendShot,
     EScreenGrabberCmdSettingsChange,
     EScreenGrabberCmdSettingsExit,
     EScreenGrabberCmdSettingsBack,
@@ -111,7 +114,9 @@ enum TScreenGrabberSettingImageFormats
 enum TScreenGrabberSettingVideoFormats
     {
 	EVideoFormatAnimatedGIF = 0,
-	EVideoFormatAnimatedGIFHQ
+	EVideoFormatAnimatedGIFHQ,
+	EVideoFormatMP4
+
     };
 
 #endif      // SCREENGRABBER_HRH

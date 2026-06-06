@@ -1,0 +1,12 @@
+
+PRJ_PLATFORMS
+GCCE
+
+
+PRJ_EXPORTS
+../x264.h 
+../x264_config.h
+
+PRJ_MMPFILES
+x264.mmp
+

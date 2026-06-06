@@ -135,6 +135,7 @@ private:
     void TakeScreenShotAndSaveL();
     void CaptureFrameForVideoHQL();
     void CaptureFrameForVideoL();
+    void CaptureFrameForMP4VideoL();
     void SaveVideoL(TInt aErr);
     void CapturingFinishedL(TInt aErr);
     void CleanTemporaryFilesL();
@@ -165,6 +166,7 @@ public:
     void MatoPrepareComplete(TInt aError);
     void MatoPlayComplete(TInt aError);
     TBool SecondScreenAvailable();
+    TPtrC SavePath();
 
 private:
     CMdaAudioToneUtility*   iMdaAudioToneUtility;       // a tone player

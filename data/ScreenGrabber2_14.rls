@@ -25,11 +25,13 @@ rls_string STRING_r_sg_command2 "Uygulama dili"
 
 rls_string STRING_r_sg_command3 "Ekran çözünürlüğü"
 
-rls_string STRING_r_sg_command4 "Ayarlar"
+rls_string STRING_r_sg_command4 "Saved shots"
 
-rls_string STRING_r_sg_command5 "Hakkında"
+rls_string STRING_r_sg_command5 "Ayarlar"
 
-rls_string STRING_r_sg_command6 "Çıkış"
+rls_string STRING_r_sg_command6 "Hakkında"
+
+rls_string STRING_r_sg_command7 "Çıkış"
 
 // Language items
 rls_string STRING_r_sg_command2_item1 "İngilizce"
@@ -37,7 +39,12 @@ rls_string STRING_r_sg_command2_item2 "Türkçe"
 rls_string STRING_r_sg_command2_item3 "Vietnamca"
 
 // used in settings menu
-rls_string STRING_r_sg_command7 "Değiştir"
+rls_string STRING_r_sg_command8 "Değiştir"
+
+
+// used in savedshots window menu
+rls_string STRING_r_sg_command9 "Delete"
+rls_string STRING_r_sg_command10 "Send"
 
 
 // strings for settings cba
@@ -127,6 +134,8 @@ rls_string STRING_r_sg_arr5_item1   "Animasyonlu GIF"
 
 rls_string STRING_r_sg_arr5_item2   "Animasyonlu GIF yüksek kalite"
 
+rls_string STRING_r_sg_arr5_item3   "MP4"
+
 // strings for dialog (Custom key)
 
 rls_string STRING_r_dlg1_label  "Bir tuşa basın:"
@@ -159,6 +168,10 @@ rls_string STRING_r_dlg6_prompt3 "Video Medya Galerisine kaydedildi"
 // strings for (restart query)
 
 rls_string STRING_r_dlg7_prompt "Restart required! exit now?"
+
+// strings for (Delete shot query)
+
+rls_string STRING_r_dlg8_prompt "Delete %U?"
 
 // usage text string 
 

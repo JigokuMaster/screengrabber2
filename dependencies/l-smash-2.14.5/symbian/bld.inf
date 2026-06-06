@@ -1,0 +1,10 @@
+PRJ_PLATFORMS
+GCCE
+
+
+PRJ_EXPORTS
+../lsmash.h 
+
+PRJ_MMPFILES
+lsmash.mmp
+

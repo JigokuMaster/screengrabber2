@@ -49,6 +49,7 @@
 #include <bautils.h>
 #include <akncommondialogs.h>
 #include <caknfileselectiondialog.h>
+#include <string.h>
 
 class HotkeyPickerDialog: public CAknMessageQueryDialog
 {

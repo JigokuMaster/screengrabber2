@@ -18,7 +18,7 @@
 &EN
 
 ; Standard SIS file header
-#{"ScreenGrabber2"},(0xdbee45c2),4,7,3,TYPE=SA
+#{"ScreenGrabber2"},(0xdbee45c2),5,0,0,TYPE=SA
 
 ;Supports Series 60 v 3.0
 [0x101F7961], 0, 0, 0, {"Series60ProductID"}
@@ -43,4 +43,7 @@
 "$(EPOCROOT)epoc32\data\z\resource\apps\ScreenGrabber2.r14"-"!:\Resource\Apps\ScreenGrabber2.r14"
 "$(EPOCROOT)epoc32\data\z\resource\apps\ScreenGrabber2.r96"-"!:\Resource\Apps\ScreenGrabber2.r96"
 "$(EPOCROOT)epoc32\data\z\private\10003a3f\apps\ScreenGrabber2_reg.rsc"-"!:\private\10003a3f\import\apps\ScreenGrabber2_reg.rsc"
+"..\data\about.html"-"!:\private\dbee45c2\about.html"
+"..\data\gpl-2.0-standalone.html"-"!:\private\dbee45c2\gpl-2.0-standalone.html"
 "..\group\backup_registration.xml"-"!:\private\dbee45c2\backup_registration.xml"
+
