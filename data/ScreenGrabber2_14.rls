@@ -19,13 +19,13 @@ rls_string qtn_caption_string "SG2"
 
 
 // strings for menu commands 
-rls_string STRING_r_sg_command1 "Arka plana gönder"
+rls_string STRING_r_sg_command1 "Arka plana al"
 
-rls_string STRING_r_sg_command2 "Language"
+rls_string STRING_r_sg_command2 "Dil"
 
 rls_string STRING_r_sg_command3 "Ekran çözünürlüğü"
 
-rls_string STRING_r_sg_command4 "Saved shots"
+rls_string STRING_r_sg_command4 "Kaydedilenler"
 
 rls_string STRING_r_sg_command5 "Ayarlar"
 
@@ -45,8 +45,8 @@ rls_string STRING_r_sg_command8 "Değiştir"
 
 
 // used in savedshots window menu
-rls_string STRING_r_sg_command9 "Delete"
-rls_string STRING_r_sg_command10 "Send"
+rls_string STRING_r_sg_command9 "Sil"
+rls_string STRING_r_sg_command10 "Gönder"
 
 
 // strings for settings cba
@@ -60,7 +60,7 @@ rls_string qtn_settings_caption_string "Ayarlar"
 
 rls_string STRING_r_sg_item1 "Yakalama modu"
 
-rls_string STRING_r_sg_item2 "Ekran aygıtı"
+rls_string STRING_r_sg_item2 "Ekran"
 
 rls_string STRING_r_sg_item3  "Yakalama kısayolu"
 
@@ -132,9 +132,9 @@ rls_string STRING_r_sg_arr4_item7   "MBM"
 
 // strings for settings sub items (Video format)
 
-rls_string STRING_r_sg_arr5_item1   "Animasyonlu GIF"
+rls_string STRING_r_sg_arr5_item1   "GIF"
 
-rls_string STRING_r_sg_arr5_item2   "YK Animasyonlu GIF"
+rls_string STRING_r_sg_arr5_item2   "GIF yüksek kalite"
 
 rls_string STRING_r_sg_arr5_item3   "MP4"
 
@@ -169,11 +169,11 @@ rls_string STRING_r_dlg6_prompt3 "Video Medya Galerisine kaydedildi"
 
 // strings for (restart query)
 
-rls_string STRING_r_dlg7_prompt "Restart required! exit now?"
+rls_string STRING_r_dlg7_prompt "Yeniden başlatma gerekli! Şimdi çıkılsın mı?"
 
 // strings for (Delete shot query)
 
-rls_string STRING_r_dlg8_prompt "Delete %U?"
+rls_string STRING_r_dlg8_prompt "%U silinsin mi?"
 
 // usage text string 
 
