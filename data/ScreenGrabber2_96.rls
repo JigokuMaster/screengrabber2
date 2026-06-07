@@ -25,7 +25,7 @@ rls_string STRING_r_sg_command2 "Ngôn ngữ"
 
 rls_string STRING_r_sg_command3 "Tỉ lệ màn hình"
 
-rls_string STRING_r_sg_command4 "Saved shots"
+rls_string STRING_r_sg_command4 "Ảnh/Video đã lưu"
 
 rls_string STRING_r_sg_command5 "Cài đặt"
 
@@ -43,8 +43,8 @@ rls_string STRING_r_sg_command8 "Thay đổi"
 
 
 // used in savedshots window menu
-rls_string STRING_r_sg_command9 "Delete"
-rls_string STRING_r_sg_command10 "Send"
+rls_string STRING_r_sg_command9 "Xóa"
+rls_string STRING_r_sg_command10 "Gửi"
 
 // strings for settings cba
 
@@ -170,7 +170,7 @@ rls_string STRING_r_dlg7_prompt "Cần khởi động lại để lưu thay đ�
 
 // strings for (Delete shot query)
 
-rls_string STRING_r_dlg8_prompt "Delete %U?"
+rls_string STRING_r_dlg8_prompt "Xóa %U?"
 
 
 // usage text string 

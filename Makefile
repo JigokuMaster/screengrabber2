@@ -22,7 +22,7 @@ mksis:
 	cd sis && PLATFORM=gcce TARGET=urel makesis -v -d$(EPOCROOT) $(APP_NAME)_gcce.pkg
 
 mksis_lite:
-	cp -v data/tmp/about_lite.html data
+	cp -v data/tmp/about_lite.html data/about.html
 	cp -v data/tmp/$(APP_NAME)_lite.pkg sis/
 	cd sis && PLATFORM=gcce TARGET=urel makesis -v -d$(EPOCROOT) $(APP_NAME)_lite.pkg
 

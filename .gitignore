@@ -1,4 +1,4 @@
 *.old
-sis/ScreenGrabber2_gcce.sis
+sis/ScreenGrabber2*.sis
 data/tmp/
 
